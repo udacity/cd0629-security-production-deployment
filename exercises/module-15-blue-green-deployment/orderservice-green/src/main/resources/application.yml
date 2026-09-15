@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: orderservice
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/orderservice
+    username: ${DB_USER:orderservice}
+    password: ${DB_PASSWORD:orderservice}
+  jpa:
+    hibernate:
+      # Flyway owns the schema now (see the flyway-maven-plugin in pom.xml
+      # and the Jenkinsfile's "Run Flyway Migration" stage) — Hibernate
+      # only validates that PlacedOrder's mapping matches what Flyway
+      # actually created, it doesn't modify the schema itself anymore.
+      ddl-auto: validate
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30s
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+inventory:
+  base-url: ${INVENTORY_BASE_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        order_processing: true
+    tags:
+      application: ${spring.application.name}
+
+server:
+  port: 8081

@@ -1,0 +1,138 @@
+// Udabank orderservice — blue-green deployment via a Kubernetes Service
+// selector swap, with a Flyway migration (renaming placed_orders.sku to
+// product_sku) coordinated around the rollout.
+//
+// Blue and green run as two separate Deployments, at the same time —
+// that's what makes this blue-green rather than a rolling update. Blue
+// keeps 100% of traffic while green comes up, gets migrated against and
+// smoke-tested, and only then receives any traffic, via one Service
+// selector patch.
+//
+// Same setup as module 14 (one Jenkins Credential, a kubeconfig already
+// in the Jenkins environment, no container registry) — see that
+// module's Jenkinsfile for the reasoning. Only one addition here:
+// `mvn flyway:migrate` runs the migration before green is deployed.
+// Postgres isn't directly reachable from wherever this pipeline runs,
+// so that stage port-forwards it out of the cluster first.
+
+pipeline {
+    agent any
+
+    environment {
+        GIT_SHA    = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'local'}"
+        GREEN_TAG  = "udabank/orderservice:green-${GIT_SHA}"
+        KUBECONFIG = '/var/jenkins_home/.kube-config'
+        DOCKER_BUILDKIT = '1'
+    }
+
+    stages {
+
+        stage('Build and Test (green)') {
+            steps {
+                dir('orderservice-green') {
+                    sh 'mvn -B clean verify'
+                }
+            }
+        }
+
+        stage('Run Flyway Migration') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('orderservice-green') {
+                    withCredentials([
+                        usernamePassword(credentialsId: 'staging-db-credentials',
+                                          usernameVariable: 'DB_USER',
+                                          passwordVariable: 'DB_PASSWORD')
+                    ]) {
+                        sh '''
+                            kubectl port-forward svc/postgres 15432:5432 &
+                            PF_PID=$!
+                            sleep 3
+                            mvn flyway:migrate \
+                                -Dflyway.url=jdbc:postgresql://localhost:15432/orderservice \
+                                -Dflyway.user=$DB_USER \
+                                -Dflyway.password=$DB_PASSWORD
+                            kill $PF_PID
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Green') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('orderservice-green') {
+                    // Build locally, no registry — same pattern as module 14.
+                    sh '''
+                        docker build -t "$GREEN_TAG" .
+                        docker save "$GREEN_TAG" | docker exec -i minikube docker load
+                    '''
+                }
+                sh '''
+                    kubectl apply -f k8s/orderservice-green-deployment.yaml
+                    kubectl set image deployment/orderservice-green orderservice="$GREEN_TAG"
+                    kubectl rollout status deployment/orderservice-green --timeout=120s
+                '''
+            }
+        }
+
+        stage('Smoke Test Green') {
+            when {
+                branch 'main'
+            }
+            steps {
+                // Deliberately NOT going through the orderservice Service —
+                // that still points at "version: blue". Port-forward straight
+                // to the green Deployment so this test only ever exercises
+                // the new version, never blue.
+                sh '''
+                    kubectl port-forward deployment/orderservice-green 18081:8081 &
+                    PF_PID=$!
+                    sleep 5
+                    curl -sf http://localhost:18081/actuator/health/readiness
+                    curl -sf http://localhost:18081/orders/SMOKE-TEST-1
+                    kill $PF_PID
+                '''
+            }
+        }
+
+        stage('Switch Traffic to Green') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: 'Smoke tests passed. Switch production traffic from blue to green?', ok: 'Switch'
+                sh '''
+                    kubectl patch service orderservice -p '{"spec":{"selector":{"version":"green"}}}'
+                '''
+            }
+        }
+
+        stage('Decommission Blue') {
+            when {
+                branch 'main'
+            }
+            steps {
+                // Scaled to 0, not deleted — a rollback just scales this
+                // back up, no rebuild needed.
+                sh 'kubectl scale deployment/orderservice-blue --replicas=0'
+            }
+        }
+    }
+
+    post {
+        failure {
+            // The real exercise sends this via the Slack Notification
+            // plugin — needs an external Slack workspace configured,
+            // which is outside the scope of a credential-free local demo.
+            // Substituting a console message here so the *shape* of
+            // "notify on failure" is still demonstrated.
+            echo "NOTIFY: orderservice blue-green deploy FAILED on ${env.BRANCH_NAME} (${GIT_SHA}): ${env.BUILD_URL}"
+        }
+    }
+}

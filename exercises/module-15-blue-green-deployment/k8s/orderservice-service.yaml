@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice
+spec:
+  type: ClusterIP
+  # This selector is the entire blue-green switch: everything currently
+  # matching "version: blue" gets traffic, "version: green" gets none,
+  # until Jenkins patches this one field. No pods are created, deleted,
+  # or restarted to perform the switch — that's what makes it instant and
+  # trivially reversible (rollback = patch this back to "blue").
+  selector:
+    app: orderservice
+    version: blue
+  ports:
+    - port: 8081
+      targetPort: 8081

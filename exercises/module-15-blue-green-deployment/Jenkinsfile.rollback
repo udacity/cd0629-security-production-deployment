@@ -1,0 +1,48 @@
+// Udabank orderservice — blue-green rollback.
+//
+// A separate pipeline, not a stage in the main Jenkinsfile — blue might
+// need to come back hours or days after that pipeline already finished,
+// once real traffic surfaces a bug the smoke test missed. Runs any time
+// blue is still around (scaled to 0, not deleted, by "Decommission Blue"
+// in the main Jenkinsfile).
+//
+// Set up as a plain Pipeline job (not multibranch), manual trigger only.
+
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube-config'
+    }
+
+    stages {
+        stage('Confirm Rollback') {
+            steps {
+                input message: 'Roll orderservice back from green to blue?', ok: 'Roll Back'
+            }
+        }
+
+        stage('Scale Blue Back Up') {
+            steps {
+                sh '''
+                    kubectl scale deployment/orderservice-blue --replicas=2
+                    kubectl rollout status deployment/orderservice-blue --timeout=120s
+                '''
+            }
+        }
+
+        stage('Switch Traffic Back to Blue') {
+            steps {
+                sh '''
+                    kubectl patch service orderservice -p '{"spec":{"selector":{"version":"blue"}}}'
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "NOTIFY: orderservice rolled back to blue: ${env.BUILD_URL}"
+        }
+    }
+}
