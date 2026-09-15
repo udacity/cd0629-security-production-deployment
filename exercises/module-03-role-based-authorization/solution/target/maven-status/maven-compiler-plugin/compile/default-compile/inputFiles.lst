@@ -1,0 +1,10 @@
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/document/Document.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/document/DocumentController.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/document/DocumentRepository.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/document/DocumentSecurity.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/document/DocumentService.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/user/DbUserDetailsService.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/user/User.java
+/Users/lauramorinigo/udacity-exercises/module-03-role-based-authorization/solution/src/main/java/com/inkwell/authdemo/user/UserRepository.java
