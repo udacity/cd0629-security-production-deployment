@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: taskflow-api
+
+# Module 5: how many failed logins before an account is temporarily
+# locked out. Kept out of code on purpose, so it can be tuned per
+# environment without a redeploy.
+security:
+  lockout:
+    max-attempts: 5
+
+logging:
+  level:
+    root: INFO
+    com.taskflow: INFO
+    org.springframework.security: INFO
+
