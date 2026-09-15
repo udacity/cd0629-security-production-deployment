@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: taskflow-api
+  # Module 9: Keycloak is expected to be running locally (see
+  # docker-compose.yml) with a realm called "taskflow" already set up.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/taskflow
+
+# Module 5's lockout threshold lived here. Retired as of Module 9 —
+# Keycloak now owns login attempts, lockout policy, and password storage
+# entirely. Left commented rather than deleted, so the history is visible.
+# security:
+#   lockout:
+#     max-attempts: 5
+
+logging:
+  level:
+    root: INFO
+    com.taskflow: INFO
+    org.springframework.security: INFO
+
