@@ -47,7 +47,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
+            <version>1.84</version>
         </dependency>
 
         <!-- Fixed: was 1.9 (CVE-2022-42889 / "Text4Shell") — see solution README. -->
