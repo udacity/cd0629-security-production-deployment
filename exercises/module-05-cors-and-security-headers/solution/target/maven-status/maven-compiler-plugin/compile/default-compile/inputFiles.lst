@@ -1,0 +1,11 @@
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/config/CspNonceHeaderWriter.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/config/CspReportController.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/Campaign.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/CampaignController.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/CampaignService.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/CreateDonationRequest.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/Donation.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/DonationController.java
+/Users/lauramorinigo/udacity-exercises/module-05-cors-and-security-headers/solution/src/main/java/com/harborlight/authdemo/donation/DonationService.java
