@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: orderservice
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/orderservice
+    username: ${DB_USER:orderservice}
+    password: ${DB_PASSWORD:orderservice}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30s
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+inventory:
+  base-url: ${INVENTORY_BASE_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        order_processing: true
+    tags:
+      application: ${spring.application.name}
+
+server:
+  port: 8081
