@@ -1,0 +1,8 @@
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/config/FilterChainInspector.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/user/DbUserDetailsService.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/user/User.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/user/UserRepository.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/web/AppController.java
+/Users/lauramorinigo/udacity-exercises/module-01-custom-authentication-configuration/solution/src/main/java/com/udabank/authdemo/web/PublicController.java
