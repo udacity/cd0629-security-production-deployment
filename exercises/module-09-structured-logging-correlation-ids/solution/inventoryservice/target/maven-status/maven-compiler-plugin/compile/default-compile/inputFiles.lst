@@ -1,0 +1,3 @@
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/inventoryservice/src/main/java/com/udabank/inventoryservice/InventoryController.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/inventoryservice/src/main/java/com/udabank/inventoryservice/InventoryServiceApplication.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/inventoryservice/src/main/java/com/udabank/inventoryservice/TraceIdFilter.java

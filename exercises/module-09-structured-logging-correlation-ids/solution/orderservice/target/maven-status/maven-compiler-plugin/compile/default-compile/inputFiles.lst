@@ -1,0 +1,5 @@
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/orderservice/src/main/java/com/udabank/orderservice/InventoryClient.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/orderservice/src/main/java/com/udabank/orderservice/OrderController.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/orderservice/src/main/java/com/udabank/orderservice/OrderServiceApplication.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/orderservice/src/main/java/com/udabank/orderservice/TraceIdFilter.java
+/Users/lauramorinigo/udacity-exercises/module-09-structured-logging-correlation-ids/solution/orderservice/src/main/java/com/udabank/orderservice/TraceparentPropagatingInterceptor.java
