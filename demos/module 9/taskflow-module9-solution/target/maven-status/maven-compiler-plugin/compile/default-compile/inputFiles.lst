@@ -1,0 +1,11 @@
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/TaskFlowApplication.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/config/SecurityConfig.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/controller/TaskController.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/model/Task.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/security/AppUserDetails.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/security/CustomAuthenticationFailureHandler.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/security/CustomAuthenticationProvider.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/security/DemoUserDetailsService.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/security/LoginAttemptService.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/service/TaskService.java
+/Users/lauramorinigo/Documents/udacity demos java web/module 9/taskflow-module9-solution/src/main/java/com/taskflow/util/PasswordHashGenerator.java
