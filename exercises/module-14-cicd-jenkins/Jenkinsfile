@@ -1,0 +1,140 @@
+// Udabank orderservice — build, test, scan, publish, deploy to staging.
+// "Staging" here is the same local minikube cluster from the Kubernetes
+// module — see k8s/ (copied from that module) for what gets deployed to.
+//
+// Requires a Multibranch Pipeline job (for `when { branch 'main' }` to
+// mean anything — a plain single-branch Pipeline job doesn't have a
+// concept of "which branch is this build").
+//
+// By design, this pipeline needs only ONE Jenkins Credential — the
+// original design needed three (an NVD API key, a registry login, a
+// kubeconfig); two of those were simplified away for a local classroom
+// demo so the focus stays on the CI/CD *shape* — branch gating, an
+// approval gate, a failure notification — not on setting up external
+// services. The one that's left genuinely can't be avoided: OWASP
+// Dependency-Check has to fetch real vulnerability data to scan
+// against, and the NVD API now hard-requires a key for that (confirmed
+// directly — there's no working "skip it" fallback on a fresh
+// instance, it fails outright instead of degrading gracefully).
+//   - nvd-api-key (Secret text) — free at
+//     nvd.nist.gov/developers/request-an-api-key, takes about a minute
+//     to get.
+//
+// Two more things this relies on, done once by whoever sets up this
+// Jenkins instance (not per student):
+//   - A working `KUBECONFIG` file already present in the Jenkins
+//     environment (see the environment block below).
+//   - `docker`, `mvn`, and a matching JDK actually installed wherever
+//     this pipeline's shell steps run — see the Kubernetes module's
+//     demo script for how that was set up in this repo's own dry run.
+//
+// Also requires these Jenkins plugins: Pipeline, Docker Pipeline,
+// OWASP Dependency-Check, and Workspace Cleanup.
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        IMAGE_NAME  = 'udabank/orderservice'
+        GIT_SHA     = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'local'}"
+        IMAGE_TAG   = "${IMAGE_NAME}:${GIT_SHA}"
+        // Points at a kubeconfig already sitting in the Jenkins home
+        // directory — dropped there once by whoever set up this
+        // instance, not something a student configures.
+        KUBECONFIG  = '/var/jenkins_home/.kube-config'
+        // orderservice/Dockerfile uses `RUN --mount=type=cache`, a
+        // BuildKit-only feature — without this, `docker build` fails
+        // with "the --mount option requires BuildKit." Needs the
+        // `buildx` CLI plugin actually installed wherever this runs.
+        DOCKER_BUILDKIT = '1'
+    }
+
+    stages {
+
+        stage('Build and Test') {
+            steps {
+                dir('orderservice') {
+                    sh 'mvn -B clean verify'
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'orderservice/target/surefire-reports/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                dir('orderservice') {
+                    withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                        sh 'mvn org.owasp:dependency-check-maven:check -DnvdApiKey=$NVD_API_KEY -DfailBuildOnCVSS=8'
+                    }
+                }
+            }
+            post {
+                always {
+                    dependencyCheckPublisher pattern: 'orderservice/target/dependency-check-report.xml'
+                }
+            }
+        }
+
+        stage('Docker Build and Load') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('orderservice') {
+                    sh '''
+                        docker build -t "$IMAGE_TAG" .
+                        docker save "$IMAGE_TAG" | docker exec -i minikube docker load
+                    '''
+                }
+            }
+        }
+
+        stage('Approve Deploy to Staging') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: "Deploy ${GIT_SHA} to staging?", ok: 'Deploy'
+            }
+        }
+
+        stage('Deploy to Staging') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                    kubectl apply -f k8s/orderservice-secret.yaml
+                    kubectl apply -f k8s/orderservice-configmap.yaml
+                    kubectl apply -f k8s/postgres.yaml
+                    kubectl apply -f k8s/redis.yaml
+                    kubectl apply -f k8s/inventoryservice-deployment.yaml
+                    kubectl apply -f k8s/orderservice-deployment.yaml
+                    kubectl apply -f k8s/orderservice-service.yaml
+                    kubectl set image deployment/orderservice orderservice="$IMAGE_TAG"
+                    kubectl rollout status deployment/orderservice --timeout=120s
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+
+            echo "NOTIFY: orderservice pipeline FAILED on ${env.BRANCH_NAME} (${GIT_SHA}): ${env.BUILD_URL}"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
