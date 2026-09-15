@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Support Notes — ' + ${customer.fullName}">Support Notes</title>
+</head>
+<body>
+<h1 th:text="${customer.fullName}">Customer Name</h1>
+<p>Account: <span th:text="${customer.accountNumber}">0000</span></p>
+
+<h2>Support Notes</h2>
+<ul>
+    <li th:each="note : ${notes}">
+        <strong th:text="${note.authorUsername}">agent</strong>:
+        <span th:text="${note.body}">note body</span>
+    </li>
+</ul>
+</body>
+</html>

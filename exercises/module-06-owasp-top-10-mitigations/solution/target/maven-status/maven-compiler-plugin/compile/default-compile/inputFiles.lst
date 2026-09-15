@@ -1,0 +1,15 @@
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/Customer.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerController.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerRepository.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerSearchResult.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerSearchService.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerSecurity.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/CustomerService.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/SupportNote.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/SupportNoteController.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/customer/SupportNoteRepository.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/user/DbUserDetailsService.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/user/User.java
+/Users/lauramorinigo/udacity-exercises/module-06-owasp-top-10-mitigations/solution/src/main/java/com/udabank/authdemo/user/UserRepository.java

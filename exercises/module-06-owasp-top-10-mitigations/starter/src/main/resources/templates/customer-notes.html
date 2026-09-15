@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Support Notes — ' + ${customer.fullName}">Support Notes</title>
+</head>
+<body>
+<h1 th:text="${customer.fullName}">Customer Name</h1>
+<p>Account: <span th:text="${customer.accountNumber}">0000</span></p>
+
+<h2>Support Notes</h2>
+<!--
+    This is the pentest's XSS finding: a note's body is customer-submitted
+    text (support agents paste in whatever a customer said), but it's
+    rendered with th:utext below, which writes the raw HTML straight into
+    the page — including a <script> tag, if a customer's message happens
+    to contain one. Every past note is stored exactly as submitted, so this
+    is a *stored* XSS: it fires for every agent who ever opens this page,
+    not just the customer who submitted it.
+
+    TODO: fix the one line below. Thymeleaf's th:text (as opposed to
+    th:utext) HTML-escapes its value automatically — that's the whole fix.
+-->
+<ul>
+    <li th:each="note : ${notes}">
+        <strong th:text="${note.authorUsername}">agent</strong>:
+        <span th:utext="${note.body}">note body</span>
+    </li>
+</ul>
+</body>
+</html>
