@@ -1,0 +1,6 @@
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/invoice/CreateInvoiceRequest.java
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/invoice/Invoice.java
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/invoice/InvoiceController.java
+/Users/lauramorinigo/udacity-exercises/module-04-oauth2-resource-server-jwt/solution/src/main/java/com/udabank/authdemo/invoice/InvoiceService.java
