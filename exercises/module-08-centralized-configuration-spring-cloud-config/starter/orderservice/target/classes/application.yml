@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: orderservice
+  cloud:
+    config:
+      # TODO: having spring-cloud-starter-config on the classpath at all makes
+      # Spring Boot refuse to start unless spring.config.import mentions
+      # "configserver:" — this flag is a temporary escape hatch so the app
+      # boots today with the hardcoded value below. Remove this line once
+      # you've added spring.config.import (see below).
+      import-check:
+        enabled: false
+
+# TODO: right now welcome.message is hardcoded per-service, per-environment —
+# exactly the "who changed prod config and when" problem centralized config
+# is meant to solve. Replace this whole block with config pulled from the
+# Config Server instead:
+#
+#   spring.config.import: "optional:configserver:http://localhost:8888"
+#
+# The "optional:" prefix matters — without it, orderservice refuses to
+# start at all if the config server isn't reachable. Once that's in place,
+# spring.application.name (already set above) is what the config server
+# uses to find orderservice.yml / orderservice-{profile}.yml for you — you
+# don't need to reference those filenames anywhere in this file.
+#
+# Delete the "welcome:" block below once you've wired it up.
+welcome:
+  message: "Hardcoded local message — not centralized"
+
+server:
+  port: 8081
