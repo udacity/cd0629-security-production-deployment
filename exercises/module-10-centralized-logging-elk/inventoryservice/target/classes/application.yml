@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: inventoryservice
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+server:
+  port: 8082
