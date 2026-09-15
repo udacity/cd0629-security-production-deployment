@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: orderservice
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+inventory:
+  base-url: http://localhost:8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        order_processing: true
+    tags:
+      application: ${spring.application.name}
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+        enabled: false
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+      enabled: false
+  tracing:
+    sampling:
+      probability: 1.0
+
+server:
+  port: 8081

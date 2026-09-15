@@ -1,0 +1,12 @@
+route:
+  receiver: default
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 5m
+
+receivers:
+  - name: default
+    # No real notification channel configured for this local exercise —
+    # Alertmanager still records and shows firing alerts in its own UI
+    # (http://localhost:9093) with an empty receiver. Add a webhook/email/
+    # Slack config here to actually route notifications somewhere.

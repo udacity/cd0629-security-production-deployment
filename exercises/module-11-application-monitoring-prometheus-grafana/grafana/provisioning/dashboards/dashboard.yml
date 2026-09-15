@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: udabank
+    folder: Udabank
+    type: file
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false

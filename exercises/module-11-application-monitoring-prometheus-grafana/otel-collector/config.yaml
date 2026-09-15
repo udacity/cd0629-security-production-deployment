@@ -1,0 +1,26 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      # No trace backend (e.g. Tempo) wired up in this exercise's scope —
+      # traces just get logged by the collector so you can confirm OTLP
+      # export is actually working. Point this at Tempo/Jaeger/etc. to
+      # persist and query them.
+      exporters: [debug]

@@ -1,0 +1,11 @@
+groups:
+  - name: udabank-slo
+    rules:
+      - alert: OrderProcessingLatencySLOBurn
+        expr: histogram_quantile(0.95, sum(rate(order_processing_seconds_bucket[5m])) by (le)) > 0.5
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: "orderservice p95 latency SLO burn"
+          description: "p95 order_processing latency has been above 500ms for 2+ minutes — see Exercise Step 6 in README.md to simulate this."
