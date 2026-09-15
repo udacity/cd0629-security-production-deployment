@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Encore Tickets — Log In</title>
+</head>
+<body>
+<h1>Encore Tickets</h1>
+
+<p th:if="${param.error}" style="color:red;">
+    Invalid username or password, or your account has been locked after too many failed attempts.
+</p>
+<p th:if="${param.logout}" style="color:green;">
+    You have been logged out.
+</p>
+
+<form th:action="@{/login}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <div>
+        <label>Username <input type="text" name="username"/></label>
+    </div>
+    <div>
+        <label>Password <input type="password" name="password"/></label>
+    </div>
+    <div>
+        <label><input type="checkbox" name="remember-me"/> Remember me on this device</label>
+    </div>
+    <button type="submit">Log In</button>
+</form>
+</body>
+</html>

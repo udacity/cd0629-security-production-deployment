@@ -1,0 +1,9 @@
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/AuthDemoApplication.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/config/SecurityConfig.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/security/AccountLockoutAuthenticationFailureHandler.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/security/RoleBasedAuthenticationSuccessHandler.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/user/DbUserDetailsService.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/user/User.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/user/UserRepository.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/web/PageController.java
+/Users/lauramorinigo/udacity-exercises/module-02-form-based-authentication-remember-me/solution/src/main/java/com/encoretickets/authdemo/web/PersistentLoginsController.java

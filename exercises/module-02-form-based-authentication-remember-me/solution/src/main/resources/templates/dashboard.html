@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Encore Tickets — My Dashboard</title>
+</head>
+<body>
+<h1>My Dashboard</h1>
+<p>Welcome back, <span th:text="${username}">customer</span>. Here are your upcoming tickets.</p>
+<form th:action="@{/logout}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Log out</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: com.encoretickets.authdemo.config.SecurityConfigTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 3.395 s <<< FAILURE! -- in com.encoretickets.authdemo.config.SecurityConfigTest
+com.encoretickets.authdemo.config.SecurityConfigTest.regularUserIsRedirectedToDashboardOnSuccessfulLogin -- Time elapsed: 0.030 s <<< FAILURE!
+java.lang.AssertionError: Redirected URL expected:</dashboard> but was:</login?error>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+	at org.springframework.test.web.servlet.result.MockMvcResultMatchers.lambda$redirectedUrl$0(MockMvcResultMatchers.java:130)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+	at com.encoretickets.authdemo.config.SecurityConfigTest.regularUserIsRedirectedToDashboardOnSuccessfulLogin(SecurityConfigTest.java:50)
+

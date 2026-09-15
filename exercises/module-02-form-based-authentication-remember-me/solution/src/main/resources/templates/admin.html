@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Encore Tickets — Admin Console</title>
+</head>
+<body>
+<h1>Venue Admin Console</h1>
+<p>Welcome, <span th:text="${username}">admin</span>. You're logged in with ADMIN access.</p>
+<form th:action="@{/logout}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Log out</button>
+</form>
+</body>
+</html>
