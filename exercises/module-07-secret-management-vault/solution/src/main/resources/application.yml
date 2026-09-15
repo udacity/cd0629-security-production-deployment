@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: authdemo
+  config:
+    import: "vault://secret/authdemo"
+  cloud:
+    vault:
+      uri: http://127.0.0.1:18200
+      token: test-token
+      kv:
+        enabled: true
+        backend: secret
+        default-context: authdemo
+
+server:
+  port: 8080

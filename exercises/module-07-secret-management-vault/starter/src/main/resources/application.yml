@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: authdemo
+  cloud:
+    vault:
+      # TODO: this is disabled so the app boots today with just the
+      # hardcoded db.* values below. Once you wire up the properties
+      # described below, remove this line (or set it to true) —
+      # otherwise Spring Cloud Vault stays fully switched off no matter
+      # what else you configure.
+      enabled: false
+
+# TODO: this is the audit finding — a real-looking DB password sitting in
+# plaintext, committed straight into the repo. Replace the `db:` block
+# below with Vault-backed config instead. You need two things (in
+# addition to flipping spring.cloud.vault.enabled above):
+#
+#   1. `spring.config.import: "vault://secret/authdemo"` — this is what
+#      tells Spring Boot to pull in Vault as a property source at startup,
+#      the same way you'd import any other config-data location.
+#   2. The rest of the `spring.cloud.vault.*` connection settings so the
+#      client knows where to reach Vault and how to authenticate:
+#        - uri                 (point this at FakeVaultServer's fixed
+#                               port — see its class-level comment)
+#        - token                (any string works against the fake
+#                               server — it doesn't validate it)
+#        - kv.enabled           (turn on the KV secrets engine backend)
+#        - kv.backend           (the KV mount name Vault's exposing
+#                               this under)
+#        - kv.default-context   (the secret path under that mount —
+#                               matches the "authdemo" in
+#                               spring.config.import above)
+#
+# With that in place, `db.username` / `db.password` resolve from Vault at
+# startup instead of from this file — delete the two lines below once
+# you've wired it up.
+db:
+  username: udabank_app
+  password: hardcoded-super-secret-do-not-commit
+
+server:
+  port: 8080
