@@ -1,0 +1,59 @@
+# Module 27: replicas: 2, matching Module 26's "factory manager"
+# example — Kubernetes constantly works to keep exactly this many Pods
+# running, replacing any that die.
+#
+# imagePullPolicy: Never is required for a locally-built image like
+# this one (from Module 25's Dockerfile, never pushed to any
+# registry). Without this, Kubernetes tries to pull "taskflow-api:latest"
+# from Docker Hub, fails, and every Pod sits in ImagePullBackOff
+# forever — a genuinely common, confusing first-time Kubernetes error.
+#
+# livenessProbe and readinessProbe point at the exact two endpoints
+# built in Module 23 — nothing new needed there, this is the real
+# infrastructure Module 22's liveness-vs-readiness lesson was always
+# building toward.
+#
+# Module 31: this is now "Blue" specifically — the currently-live
+# environment. Two labels matter here: app: taskflow-api (shared by
+# both Blue and Green, so both count toward "this whole application"),
+# and version: blue (unique to this one, what the Service's selector
+# actually switches between on cutover).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskflow-api-blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: taskflow-api
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: taskflow-api
+        version: blue
+    spec:
+      containers:
+        - name: taskflow-api
+          image: taskflow-api:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: taskflow-config
+            - secretRef:
+                name: taskflow-secret
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 5

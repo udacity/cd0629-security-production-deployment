@@ -1,0 +1,16 @@
+# Module 27: non-sensitive settings only, matching Module 26's exact
+# pattern (a database-url in a ConfigMap). Vault's own URI isn't
+# sensitive — it's just a location, like a hostname — so it belongs
+# here, not in the Secret alongside it.
+#
+# host.docker.internal, same pattern as Modules 23 and 25: Vault runs
+# via `docker compose up -d`, completely separate from this Kubernetes
+# cluster. This Pod reaches it through the host, the same way
+# Prometheus reached TaskFlow and the standalone Docker container
+# reached Vault.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskflow-config
+data:
+  SPRING_CLOUD_VAULT_URI: "http://host.docker.internal:8200"

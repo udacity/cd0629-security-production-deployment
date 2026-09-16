@@ -1,0 +1,34 @@
+# Module 27: ClusterIP, matching Module 26's exact framing — internal
+# only, no path in from outside the cluster on its own. This gives the
+# two shifting, replaceable Pods from deployment.yaml one stable
+# address that never changes, load-balancing across whichever Pods are
+# currently healthy.
+#
+# To actually reach this from outside the cluster for testing, use
+# kubectl port-forward rather than NodePort — simpler, no extra host
+# networking to configure, and it's the standard way a developer
+# reaches into a cluster locally. NodePort and LoadBalancer exist and
+# matter in real deployments (see Module 26), just not needed for this
+# specific test.
+#
+# Module 31: this one line, "version: blue", IS the entire Blue-Green
+# cutover mechanism. Both taskflow-api-blue and taskflow-api-green
+# match "app: taskflow-api" — adding "version: blue" here means this
+# Service only ever routes to Blue's Pods, completely ignoring Green's,
+# even though Green is fully running the whole time. Changing this one
+# value to "green" (and re-applying) is the entire traffic switch —
+# nearly instantaneous, exactly like Module 30 described for Nginx,
+# just using Kubernetes' own routing instead of a separate reverse
+# proxy.
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskflow-service
+spec:
+  type: ClusterIP
+  selector:
+    app: taskflow-api
+    version: blue
+  ports:
+    - port: 8080
+      targetPort: 8080
