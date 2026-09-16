@@ -1,0 +1,52 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      # Host 8081 -> container 8080, so it doesn't collide with
+      # TaskFlow's own port 8080.
+      - "8081:8080"
+
+  # Module 15: dev-mode Vault, the same "not for production" convenience
+  # as Keycloak's start-dev — in-memory, auto-unsealed, a fixed root
+  # token instead of a real unseal process.
+  vault:
+    image: hashicorp/vault:1.18
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: taskflow-root-token
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    ports:
+      - "8200:8200"
+
+  # Module 21: single-node, security disabled — same "not for
+  # production" convenience as everything else in this file. Heap
+  # capped at 512MB on purpose; this is a demo with a handful of log
+  # lines, not a real cluster, and an uncapped heap is the most common
+  # reason Elasticsearch crashes locally (exit code 137 = out of memory).
+  # Before starting this, confirm Docker Desktop has at least 4GB of
+  # memory allocated overall (Settings -> Resources).
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.enrollment.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.4
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      XPACK_SECURITY_ENABLED: "false"
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
