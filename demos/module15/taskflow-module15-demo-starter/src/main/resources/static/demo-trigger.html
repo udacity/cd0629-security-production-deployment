@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TaskFlow Demo Trigger</title>
+</head>
+<body>
+  <!--
+    Used by Module 5's Demo recording to fire a real browser POST
+    against the protected /api/v1/tasks endpoint, so the browser's
+    native Basic Auth popup (or, after Module 5's changes, the real
+    login form) appears.
+
+    Uses fetch() with a JSON body, the same way a real frontend would
+    talk to this API — not a raw HTML form submission, which sends
+    form-urlencoded data the API doesn't understand and causes a full
+    page navigation. Browsers show the same native Basic Auth popup
+    for a fetch() request that gets a 401 + WWW-Authenticate: Basic as
+    they do for a full page load, so nothing is lost by doing it this
+    way, and the result renders cleanly instead of erroring out.
+
+    Served automatically by Spring Boot from src/main/resources/static,
+    no controller mapping needed. Visit:
+      http://localhost:8080/demo-trigger.html
+  -->
+  <h1>TaskFlow Demo Trigger</h1>
+  <button id="create-btn">Create Task</button>
+  <pre id="result"></pre>
+
+  <script>
+    document.getElementById('create-btn').addEventListener('click', async () => {
+      const resultEl = document.getElementById('result');
+      resultEl.textContent = 'Sending...';
+      try {
+        const response = await fetch('/api/v1/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Demo task' })
+        });
+        const body = await response.json().catch(() => null);
+        resultEl.textContent = 'Status: ' + response.status + '\n' + JSON.stringify(body, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Request failed: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
