@@ -228,6 +228,3 @@ source code?
 
 *(A good reflection response is between 75 and 125 words — a bit longer
 than other modules', since there's more to observe here.)*
-
-See [`docs/SOLUTION.md`](docs/SOLUTION.md) for one answer, and for the
-module's own "reading the dashboard" walkthrough.

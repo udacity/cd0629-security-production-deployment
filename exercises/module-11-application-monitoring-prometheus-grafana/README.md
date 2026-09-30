@@ -118,6 +118,3 @@ look at on the dashboard, in the 2 minutes before the alert fires, to
 decide whether to start responding early or wait for the page?
 
 *(A good reflection response is between 75 and 125 words.)*
-
-See [`docs/SOLUTION.md`](docs/SOLUTION.md) for one answer, and for the
-module's own "reading the dashboard during an incident" walkthrough.

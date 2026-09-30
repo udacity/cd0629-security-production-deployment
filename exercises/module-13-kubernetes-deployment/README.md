@@ -155,5 +155,3 @@ job in this scenario?
 
 *(A good reflection response is between 75 and 125 words.)*
 
-See [`docs/SOLUTION.md`](docs/SOLUTION.md) for one answer, and for the
-module's own "rolling an update and observing pod lifecycle" walkthrough.

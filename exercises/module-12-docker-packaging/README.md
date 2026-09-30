@@ -94,10 +94,7 @@ just not click-run-confirmed as literally `docker compose up`.
    ```bash
    mvn compile jib:dockerBuild
    ```
-   On this machine, with JDK 25: **this fails.** See
-   [`docs/SOLUTION.md`](docs/SOLUTION.md) for exactly why, and why that
-   failure is itself the most useful part of this comparison.
-
+   
 ## Common Pitfalls
 
 - **`java -Djarmode=layertools`** is the old syntax (Spring Boot ≤3.1) —

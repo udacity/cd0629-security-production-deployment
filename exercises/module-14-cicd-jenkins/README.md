@@ -94,9 +94,7 @@ notification if any of it fails.
    fires (a real setup would send this to Slack or email instead —
    simplified here to keep the exercise credential-free).
 
-6. **Re-run just the failed stage**, not the whole pipeline. See
-   [`docs/SOLUTION.md`](docs/SOLUTION.md) for exactly how, and what it
-   does and doesn't re-do.
+6. **Re-run just the failed stage**, not the whole pipeline. 
 
 ## Common Pitfalls
 
