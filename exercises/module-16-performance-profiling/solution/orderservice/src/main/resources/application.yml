@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: orderservice
+  datasource:
+    url: jdbc:h2:mem:orderservice;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      # Deliberately undersized for this exercise — see README.md.
+      # Combined with the N+1 in OrderService, a small pool means requests
+      # start queueing for a connection under load, which is exactly the
+      # kind of thing JFR's jdk.JavaMonitorWait / thread-state events (and
+      # HikariCP's own pool metrics) should surface.
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+server:
+  port: 8081
