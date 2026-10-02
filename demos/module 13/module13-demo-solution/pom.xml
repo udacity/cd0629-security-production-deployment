@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.0</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.taskflow</groupId>
+    <artifactId>taskflow-api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>taskflow-api</name>
+    <description>Demo 3 - Apply Custom Authentication Configuration (cd0629-SecurityDevOps)</description>
+
+    <properties>
+        <java.version>25</java.version>
+        <!-- Required so @PreAuthorize expressions like #task.owner can
+             resolve method parameter names by reflection (used starting
+             Module 7). Without this, Spring Security cannot see parameter
+             names at runtime and the expression fails. -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Module 13: a real (in-memory) database, so Injection has a
+             genuine attack surface to demonstrate. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Module 13: exposes /actuator/** so we have something real to
+             lock down for the Security Misconfiguration mitigation. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Module 13: contextual output encoding for the XSS mitigation. -->
+        <dependency>
+            <groupId>org.owasp.encoder</groupId>
+            <artifactId>encoder</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <!-- Required at runtime by Argon2PasswordEncoder. Spring Security's
+             Argon2 implementation delegates to Bouncy Castle for the actual
+             hashing; it is not pulled in by spring-boot-starter-security on
+             its own. Version is managed by the spring-boot-starter-parent BOM. -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.83</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Module 13, Vulnerable and Outdated Components: scans every
+                 dependency, including nested/transitive ones, against known
+                 CVEs. Bound to the verify phase, so `mvn verify` runs it
+                 automatically — but see the README before running this for
+                 the first time. The first run downloads the entire NVD
+                 vulnerability database, which can take a long time without
+                 an API key configured. Do this once, well before recording,
+                 never live. -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>13.0.0</version>
+                <configuration>
+                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
