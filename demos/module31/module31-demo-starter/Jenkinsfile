@@ -1,0 +1,71 @@
+// Module 29: matches Module 28's exact declarative structure —
+// pipeline { agent ... stages { stage('...') { steps { ... } } } }.
+//
+// Build, Test, and Package each run in a fresh, ephemeral container
+// based on maven:3.9-eclipse-temurin-25 — the exact same image Module
+// 25's Dockerfile uses to build the real app image. The workspace
+// (including whatever a previous stage compiled) carries over
+// automatically between stages, since the docker-workflow plugin mounts
+// the same job workspace into each ephemeral container.
+//
+// The final Docker Build stage deliberately has no agent override —
+// it runs directly on the controller, which is the one place in this
+// setup with access to the host's Docker socket.
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-25'
+                    args '-v $HOME/.m2:/root/.m2'
+                }
+            }
+            steps {
+                sh 'mvn compile -B'
+            }
+        }
+
+        stage('Test') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-25'
+                    args '-v $HOME/.m2:/root/.m2'
+                }
+            }
+            steps {
+                sh 'mvn test -B'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Package') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-25'
+                    args '-v $HOME/.m2:/root/.m2'
+                }
+            }
+            steps {
+                sh 'mvn package -DskipTests -B'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t taskflow-api:latest .'
+            }
+        }
+    }
+}
