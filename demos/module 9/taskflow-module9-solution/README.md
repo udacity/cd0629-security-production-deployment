@@ -1,4 +1,4 @@
-# TaskFlow – Module 9 Solution
+# TaskFlow – Module 9 Demo Solution
 
 A Spring Boot REST API that acts as an **OAuth2 Resource Server**. TaskFlow no
 longer manages users, passwords or sessions. Identity is delegated to
