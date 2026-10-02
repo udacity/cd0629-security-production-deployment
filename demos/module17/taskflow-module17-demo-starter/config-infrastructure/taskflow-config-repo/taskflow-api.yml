@@ -1,0 +1,7 @@
+# Module 17: this file's name matters. Spring Cloud Config Server
+# resolves it automatically from TaskFlow's spring.application.name
+# (taskflow-api) — this is the {application}.yml pattern Module 16
+# described, no extra wiring needed on the server side to find it.
+partner:
+  request:
+    timeout-seconds: 30

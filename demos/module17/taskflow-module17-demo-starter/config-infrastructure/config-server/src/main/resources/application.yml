@@ -1,0 +1,17 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          # Expects taskflow-config-repo as a SIBLING folder to this
+          # project (config-server/ and taskflow-config-repo/ side by
+          # side, same parent directory). ${user.dir} resolves to
+          # wherever you launched `mvn spring-boot:run` from — normally
+          # this project's own root.
+          uri: file://${user.dir}/../taskflow-config-repo
+          default-label: main
