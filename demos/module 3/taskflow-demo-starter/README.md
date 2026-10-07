@@ -1,44 +1,79 @@
-# TaskFlow API — Demo 3 STARTER project
+# TaskFlow – Module 3 Starter
 
-This is the "before" state for Module 3, "Demo: Apply Custom Authentication
-Configuration." It's deliberately bare: a working Task API with **no
-security configuration at all**. This is what makes Spring Boot's default
-auto-login behavior show up genuinely, no need to fake it by hiding code.
+A small Spring Boot REST API for tasks with **no security configuration at all**.
+`spring-boot-starter-security` is on the classpath, so Spring Boot applies its default
+behaviour, but nothing customizes it.
 
-The completed version lives in the separate `taskflow-solution` project —
-don't peek at it until after recording the Demo.
+Use this project as the starting point for building custom authentication.
 
 ## What's here
 
-- `TaskFlowApplication.java` — entry point
-- `TaskController.java` — `GET`/`POST /api/v1/tasks`, fully open right now
-- `Task.java` — plain model
-- `application.yml` — port 8080, basic logging
+| File | What it does |
+|------|--------------|
+| `TaskFlowApplication.java` | Application entry point |
+| `controller/TaskController.java` | `GET` and `POST /api/v1/tasks`, stored in memory |
+| `model/Task.java` | A plain task model |
+| `application.yml` | Port 8080 and basic logging |
 
-No `SecurityConfig`, no custom `UserDetailsService`, no
-`AuthenticationProvider`. `spring-boot-starter-security` is on the
-classpath (so Spring Boot's default behavior kicks in), but nothing
-customizes it yet.
+There is no `SecurityConfig`, no custom `UserDetailsService` and no
+`AuthenticationProvider`.
 
-## Recording flow
+## The problem
 
-1. `mvn clean install`, then `mvn spring-boot:run`.
-2. In the browser, go to `http://localhost:8080/api/v1/tasks`. You'll be
-   redirected to Spring's default login page — genuinely unstyled,
-   because nothing here overrides it.
-3. Check the console output from startup. You'll see a real line like:
+With Spring Security on the classpath and no configuration, Spring Boot protects every
+endpoint with a generated login. It works, but it isn't practical:
+
+- The password is **random and changes on every restart**.
+- There is **no real user store**, only a single built-in user.
+- There is **no place for business rules**, such as "is this account still active?"
+- **Everything is locked down**, including endpoints you'd want to leave open.
+
+## Tech stack
+
+- Java 25
+- Spring Boot 4.0.0 (Spring Security 7)
+- Maven
+
+## Run it
+
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+The app starts on <http://localhost:8080>.
+
+## See the problem
+
+1. Open <http://localhost:8080/api/v1/tasks> in a browser. You're redirected to Spring's
+   default login page, which is unstyled because nothing overrides it.
+2. Look at the console output from startup. You'll see a line like:
    ```
    Using generated security password: 8f14e045-fceb-4dc5-9e2c-4a3e5c8b9a11
    ```
-   This is real this time — no custom `UserDetailsService` exists yet to
-   suppress it.
-4. Log in with username `user` and that generated password. Point out:
-   it works, but it's completely impractical — a new random password
-   every restart, no real user store, no way to add business rules like
-   "is this account still active."
-5. Lay out the requirements for what you're about to build in the
-   Solution video: a real `SecurityFilterChain`, a real user store,
-   Argon2id password hashing, and a custom `AuthenticationProvider`.
+   Your password will differ.
+3. Log in with the username `user` and that generated password. It works, but a new
+   random password on every restart is no basis for a real application.
 
-That's the full Demo. Nothing to build here — the Solution project is a
-separate, complete implementation.
+## What you'll build next
+
+- A real `SecurityFilterChain` that protects only the endpoints that need it
+- A real user store
+- Argon2id password hashing
+- A custom `AuthenticationProvider` with your own business rule
+
+## Project structure
+
+```
+src/main/
+├── java/com/taskflow/
+│   ├── TaskFlowApplication.java
+│   ├── controller/TaskController.java
+│   └── model/Task.java
+└── resources/
+    └── application.yml
+```
+
+## Notes
+
+- Tasks live in memory and are lost on restart.
