@@ -22,7 +22,7 @@ HTTP API for the actual Spring Cloud Vault client to talk to.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 curl http://localhost:8080/internal/db-status
 # right now: {"username":"udabank_app","passwordConfigured":true} — hardcoded
 ```
@@ -30,7 +30,7 @@ curl http://localhost:8080/internal/db-status
 ## Verifying your work
 
 ```bash
-./mvnw test -Dtest=VaultConfigTest
+mvn test -Dtest=VaultConfigTest
 ```
 
 Fill in the TODO test assertion — once your `application.yml` fix is
