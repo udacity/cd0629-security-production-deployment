@@ -51,7 +51,7 @@ example. Two things are still open doors:
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ## Verifying your work
@@ -98,7 +98,7 @@ locally and open Chrome/Firefox DevTools' **Network** tab:
 Or run the test skeletons — 2 are given as worked examples, 2 are `TODO`:
 
 ```bash
-./mvnw test -Dtest=SecurityHeadersTest
+mvn test -Dtest=SecurityHeadersTest
 ```
 
 ## Task List
