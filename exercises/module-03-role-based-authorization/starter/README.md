@@ -59,7 +59,7 @@ you compose the actual expression.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ## Verifying your work
@@ -85,7 +85,7 @@ Or run the test skeletons — 3 are already given as worked examples, 2
 (the ones that actually prove Jules's bug is fixed) are `TODO`:
 
 ```bash
-./mvnw test -Dtest=DocumentAuthorizationTest
+mvn test -Dtest=DocumentAuthorizationTest
 ```
 
 ## Task List
