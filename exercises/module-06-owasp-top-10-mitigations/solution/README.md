@@ -86,12 +86,12 @@ actually invoke directly.
 ## Verifying the two code fixes
 
 ```bash
-./mvnw test -Dtest=OwaspFindingsTest
+mvn test -Dtest=OwaspFindingsTest
 # 4 tests, all green
 ```
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ```bash
