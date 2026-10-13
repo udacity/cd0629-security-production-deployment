@@ -64,7 +64,7 @@ Remember-me itself is already fully configured; you don't need to touch it.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 Then open `http://localhost:8080/login` in a browser — the form, CSRF token,
@@ -87,7 +87,7 @@ the "not done yet" state. Once both TODOs are done:
 Or just run the (currently empty) test skeletons and fill them in as you go:
 
 ```bash
-./mvnw test -Dtest=SecurityConfigTest
+mvn test -Dtest=SecurityConfigTest
 ```
 
 You're done when all 5 tests in `SecurityConfigTest` pass.
