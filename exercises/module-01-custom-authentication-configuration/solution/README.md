@@ -75,7 +75,7 @@ DSL call that should have added/removed it isn't doing what you think.
 ## Verifying the solution
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ```bash
@@ -94,7 +94,7 @@ curl -i -u alice:wrong-password http://localhost:8080/app/dashboard
 ```
 
 ```bash
-./mvnw test -Dtest=SecurityConfigTest
+mvn test -Dtest=SecurityConfigTest
 # 4 tests, all green
 ```
 
