@@ -65,12 +65,12 @@ something external.
 ## Verifying the solution
 
 ```bash
-./mvnw test -Dtest=SecurityHeadersTest
+mvn test -Dtest=SecurityHeadersTest
 # 4 tests, all green
 ```
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ```bash
