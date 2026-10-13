@@ -46,7 +46,7 @@ file each.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ## Verifying your work
@@ -73,7 +73,7 @@ Or run the test skeletons — 2 are given as worked examples (they verify
 the access-control fix, which is already done), 2 verify your two TODOs:
 
 ```bash
-./mvnw test -Dtest=OwaspFindingsTest
+mvn test -Dtest=OwaspFindingsTest
 ```
 
 ## Task List
