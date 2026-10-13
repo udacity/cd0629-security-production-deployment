@@ -75,12 +75,12 @@ Two things worth pointing out to Yusuf from that output:
 ## Verifying the solution
 
 ```bash
-./mvnw test -Dtest=InvoiceAuthorizationTest
+mvn test -Dtest=InvoiceAuthorizationTest
 # 5 tests, all green
 ```
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ```bash
