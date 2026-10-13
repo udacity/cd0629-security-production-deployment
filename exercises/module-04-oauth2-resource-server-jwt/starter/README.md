@@ -69,7 +69,7 @@ anything real to test against.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 There's no login form here — every request needs an
@@ -93,7 +93,7 @@ Or run the test skeletons — 3 are given as worked examples, 2 (the ones
 that actually prove the bug is fixed) are `TODO`:
 
 ```bash
-./mvnw test -Dtest=InvoiceAuthorizationTest
+mvn test -Dtest=InvoiceAuthorizationTest
 ```
 
 ## Task List
