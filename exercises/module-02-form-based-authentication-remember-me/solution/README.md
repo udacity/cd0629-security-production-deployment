@@ -72,14 +72,14 @@ Two things worth pointing out to Devon from that output:
 ## Verifying the solution
 
 ```bash
-./mvnw test -Dtest=SecurityConfigTest
+mvn test -Dtest=SecurityConfigTest
 # 5 tests, all green
 ```
 
 Manually:
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 - `alice` / `BoxOffice!2025` → redirects to `/admin`
