@@ -75,12 +75,12 @@ instead of needing to remember it.
 ## Verifying the solution
 
 ```bash
-./mvnw test -Dtest=DocumentAuthorizationTest
+mvn test -Dtest=DocumentAuthorizationTest
 # 5 tests, all green
 ```
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ```bash
