@@ -63,7 +63,7 @@ and the lambda-only DSL are already used in the example rule — just mirror it.
 ## Running it
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ## Verifying your work
@@ -92,7 +92,7 @@ curl -i -u alice:wrong-password http://localhost:8080/app/dashboard
 Or run the (currently empty) test skeletons and fill them in as you go:
 
 ```bash
-./mvnw test -Dtest=SecurityConfigTest
+mvn test -Dtest=SecurityConfigTest
 ```
 
 You're done when all four `curl` checks above behave as described and the
