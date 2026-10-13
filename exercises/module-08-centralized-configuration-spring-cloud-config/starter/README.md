@@ -31,7 +31,7 @@ Two terminals:
 
 ```bash
 # Terminal 1
-cd config-server && ../../../mvnw spring-boot:run   # or: mvn spring-boot:run
+cd config-server && ../../../mvn spring-boot:run   # or: mvn spring-boot:run
 
 # Terminal 2 (after the config server logs "Started ConfigServerApplication")
 cd orderservice && mvn spring-boot:run
