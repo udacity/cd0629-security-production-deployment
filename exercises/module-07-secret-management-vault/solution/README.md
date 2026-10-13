@@ -38,12 +38,12 @@ account for that — the path and response shape genuinely differ.
 ## Verifying
 
 ```bash
-./mvnw test -Dtest=VaultConfigTest
+mvn test -Dtest=VaultConfigTest
 # 1 test, green
 ```
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 curl http://localhost:8080/internal/db-status
 # {"username":"vault_managed_user","passwordConfigured":true}
 ```
