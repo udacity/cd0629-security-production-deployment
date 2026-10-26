@@ -68,7 +68,7 @@ mvn spring-boot:run
 
 ## Verifying your work
 
-Before you touch any code, run `./mvnw spring-boot:run` and try the two
+Before you touch any code, run `./mvn spring-boot:run` and try the two
 endpoints: `/public/health` already returns **200** (that's the given
 example rule), but `/app/dashboard` returns **401** no matter what
 credentials you pass — the `PasswordEncoder` bean doesn't exist yet, so
