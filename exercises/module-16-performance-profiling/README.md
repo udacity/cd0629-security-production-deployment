@@ -119,7 +119,7 @@ inside whichever of those two directories is relevant to that step —
   your terminal's PATH the way it does for `java`. Fix:
   `export PATH="$(/usr/libexec/java_home -v 25)/bin:$PATH"` once per
   terminal session, then `jfr` will work.
-- **`./mvnw: not found`.** Same gap as every other module in this
+- **`./mvn: not found`.** Same gap as every other module in this
   series — the Maven wrapper was never committed. Every command above
   uses plain `mvn` instead, which needs Maven and a JDK matching
   `pom.xml` (25) actually installed. Confirmed working with Java 25
