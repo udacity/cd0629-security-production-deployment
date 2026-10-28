@@ -48,7 +48,7 @@ Resolved SecurityFilterChain: DefaultSecurityFilterChain
   -> AuthorizationFilter
 ```
 
-(Captured from an actual local run — see `target/surefire-reports` after `./mvnw test`.)
+(Captured from an actual local run — see `target/surefire-reports` after `mvn test`.)
 
 Three things worth confirming from that list, and why they matter:
 
