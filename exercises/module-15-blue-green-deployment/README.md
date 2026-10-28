@@ -1,12 +1,12 @@
 # Exercise: Apply Blue-Green Deployment with Jenkins and Flyway
 
 **Estimated time:** 35–45 minutes — the most involved module in this
-series, combining CI/CD (module 14), Kubernetes (module 13), and a real
+series, combining CI/CD, Kubernetes , and a real
 schema migration into one coordinated rollout.
 
 ## A note on how this exercise was built
 
-Unlike modules 13–14, this one has actually been run live, end to end,
+This exercise one has actually been run live, end to end,
 against a real Jenkins instance, a real minikube cluster, and — the
 part that matters most here — a real Postgres database that already
 had a live row in it before the migration ran. Specifically verified:
@@ -34,8 +34,8 @@ from backup if it goes wrong partway through.
 
 ## What's here
 
-- `orderservice-blue/` — the **unmodified** current app (identical to
-  the end of module 14). Still reads and writes only `sku`. Never
+- `orderservice-blue/` — the **unmodified** current app (the same
+  application code as the end of module 14). Still reads and writes only `sku`. Never
   touched by this exercise's migrations.
 - `orderservice-green/` — the v2 app: dual-writes both `sku` and
   `product_sku` on every insert, and now uses Flyway
@@ -44,7 +44,7 @@ from backup if it goes wrong partway through.
 - `orderservice-green/src/main/resources/db/migration/` — `V2` (add the
   column) and `V3` (backfill existing rows), the "expand" half of
   expand-contract. (`V4`/dropping `sku` is the "contract" half — see
-  "What this exercise doesn't do" below.)
+  the final section of this README, "What this exercise doesn't do".)
 - `k8s/` — blue and green as **separate** Deployments, running
   simultaneously, plus one Service whose `selector.version` field is the
   entire traffic switch.
@@ -67,15 +67,27 @@ one Jenkins Credential beyond what module 14 already required:
    as a Jenkins Credential so the pipeline can use them without them
    being hardcoded into the Jenkinsfile.
 2. A **Multibranch Pipeline** job pointed at this repo (same pattern as
-   module 14), for the main `Jenkinsfile`.
+   module 14), for the main `Jenkinsfile`. This module folder is meant
+   to be the **root of its own git repository**, so `Jenkinsfile` sits
+   at the repo root and the paths inside it (`orderservice-green/`,
+   `k8s/`) resolve correctly. If you push it as a subfolder of a larger
+   repo instead, set the job's **Script Path** to
+   `<subfolder>/Jenkinsfile` and wrap each stage's steps in
+   `dir('<subfolder>')`.
 3. A second, plain **Pipeline** job (not multibranch — it doesn't need
    to react to branch pushes) pointed at `Jenkinsfile.rollback`,
    manual-trigger only.
 
 ## Exercise Steps
 
-1. **Deploy blue first**, as the known-good starting state:
+1. **Deploy blue first**, as the known-good starting state. The
+   Jenkinsfile only builds green, so build the blue image yourself once
+   from `orderservice-blue/Dockerfile` and load it into minikube (same
+   `docker save | docker exec -i minikube docker load` pattern the
+   pipeline uses for green):
    ```bash
+   docker build -t udabank/orderservice:blue orderservice-blue/
+   docker save udabank/orderservice:blue | docker exec -i minikube docker load
    kubectl apply -f k8s/orderservice-configmap.yaml
    kubectl apply -f k8s/orderservice-secret.yaml
    kubectl apply -f k8s/postgres.yaml
@@ -83,7 +95,8 @@ one Jenkins Credential beyond what module 14 already required:
    kubectl apply -f k8s/inventoryservice-deployment.yaml
    kubectl apply -f k8s/orderservice-blue-deployment.yaml
    kubectl apply -f k8s/orderservice-service.yaml
-   curl (through a port-forward) http://localhost:8081/orders/ORD-1
+   kubectl port-forward deployment/orderservice-blue 8081:8081 &
+   curl http://localhost:8081/orders/ORD-1
    ```
 
 2. **Trigger the main Jenkinsfile on `main`.** Watch it run migrations
@@ -97,7 +110,7 @@ one Jenkins Credential beyond what module 14 already required:
 
 4. **Approve the traffic switch** when prompted. Immediately after,
    `kubectl get svc orderservice -o jsonpath='{.spec.selector}'` should
-   show `version: green`.
+   print `{"app":"orderservice","version":"green"}`.
 
 5. **Confirm zero dropped requests during the switch** — run a tight curl
    loop against the Service (not a pod directly) spanning the moment you
@@ -114,7 +127,7 @@ one Jenkins Credential beyond what module 14 already required:
 
 - **`./mvnw: not found`.** Same gap as module 14 — the Maven wrapper was
   never committed to either `orderservice-blue/` or `orderservice-green/`.
-  Both the `Build and Test` and `Run Flyway Migration` stages call plain
+  Both the `Build and Test (green)` and `Run Flyway Migration` stages call plain
   `mvn` instead, which needs Maven and a matching JDK actually present
   wherever the pipeline's shell steps run.
 - **The Flyway migration stage can't reach Postgres.** Postgres only has
@@ -124,12 +137,11 @@ one Jenkins Credential beyond what module 14 already required:
   (`kubectl port-forward svc/postgres 15432:5432 &`) and points
   `flyway.url` at `localhost:15432` — the same shape of fix as the smoke
   test stage already used for reaching green directly.
-- **`docker push` fails or hangs against `registry.udabank.example`.**
-  That hostname doesn't exist anywhere — same fictional-registry issue
-  as module 14's original Jenkinsfile. Fixed the same way: build locally
-  and copy the image straight into the cluster's own runtime with
-  `docker save | docker exec -i minikube docker load`, no registry
-  involved.
+- **`ImagePullBackOff` on the blue or green pods.** There is no
+  container registry in this setup, so nothing can be pulled. Images
+  are built locally and copied straight into minikube's runtime with
+  `docker save | docker exec -i minikube docker load`. If you skipped
+  the blue build in Step 1, blue's pods fail this way.
 - **No webhook from GitHub to this Jenkins instance.** It's running on
   `localhost`, unreachable from GitHub's servers — pushing a commit
   does not trigger a build by itself. Click **Scan Repository Now** on
