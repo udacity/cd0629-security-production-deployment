@@ -8,7 +8,7 @@ services:
       - POSTGRES_USER=orderservice
       - POSTGRES_PASSWORD=orderservice
     ports:
-      - "5433:5432" # host 5433 to dodge a local Postgres already on 5432; app connects via the internal 5432
+      - "5432:5432" # matches the app's default DB_PORT, so a jar run on the host connects with no extra config
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U orderservice"]
       interval: 5s
