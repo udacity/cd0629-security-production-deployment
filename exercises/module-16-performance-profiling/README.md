@@ -91,10 +91,17 @@ inside whichever of those two directories is relevant to that step —
    `ConcurrentBag.borrow` showing up repeatedly, on request-handling
    (`http-nio-*`) threads, is your first real clue.
 
-4. **Compare against `solution/orderservice/`.** Read the diff between
-   `starter/orderservice/src/main/java/com/udabank/orderservice/PlacedOrderRepository.java`
-   and the same file under `solution/`, plus `application.yml`'s
-   `maximum-pool-size`, to see exactly what changed. Then `cd
+4. **Compare against `solution/orderservice/`.** Three files differ
+   between `starter/` and `solution/`. Read the diff for each, under
+   `orderservice/src/main/`:
+   - `java/com/udabank/orderservice/PlacedOrderRepository.java` — adds
+     the `findAllWithLineItems()` query.
+   - `java/com/udabank/orderservice/OrderService.java` — line 27 calls
+     `findAllWithLineItems()` instead of `findAll()`, so the new query is
+     actually used.
+   - `resources/application.yml` — `maximum-pool-size`.
+
+   Then `cd
    solution/orderservice`, build and run it the same way as Step 3, and
    re-run Step 2's load test against it. The improvement should be
    dramatic and immediate, not marginal.
@@ -119,7 +126,7 @@ inside whichever of those two directories is relevant to that step —
   your terminal's PATH the way it does for `java`. Fix:
   `export PATH="$(/usr/libexec/java_home -v 25)/bin:$PATH"` once per
   terminal session, then `jfr` will work.
-- **`./mvn: not found`.** Same gap as every other module in this
+- **`./mvnw: not found`.** Same gap as every other module in this
   series — the Maven wrapper was never committed. Every command above
   uses plain `mvn` instead, which needs Maven and a JDK matching
   `pom.xml` (25) actually installed. Confirmed working with Java 25
