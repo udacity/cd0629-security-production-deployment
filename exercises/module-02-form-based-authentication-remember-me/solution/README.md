@@ -4,8 +4,7 @@
 token store, not just a long session), account lockout after 5 failed
 logins to blunt a credential-stuffing pattern support was seeing, and
 role-based redirects so venue admins land on `/admin` instead of the
-customer dashboard. See [`../starter/README.md`](../starter/README.md) for
-Devon's full message and the task breakdown.
+customer dashboard. 
 
 ## What changed
 
