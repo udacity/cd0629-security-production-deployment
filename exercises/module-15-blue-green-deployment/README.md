@@ -1,28 +1,8 @@
 # Exercise: Apply Blue-Green Deployment with Jenkins and Flyway
 
 **Estimated time:** 35–45 minutes — the most involved module in this
-series, combining CI/CD, Kubernetes , and a real
+series, combining CI/CD (module 14), Kubernetes (module 13), and a real
 schema migration into one coordinated rollout.
-
-## A note on how this exercise was built
-
-This exercise one has actually been run live, end to end,
-against a real Jenkins instance, a real minikube cluster, and — the
-part that matters most here — a real Postgres database that already
-had a live row in it before the migration ran. Specifically verified:
-blue deployed and served traffic; the Flyway migration ran against
-that live database while blue kept serving 100% of requests undisturbed;
-the pre-existing order blue had already written got its `product_sku`
-backfilled correctly, not just new rows; green passed its smoke test;
-the traffic switch happened with a curl loop running the entire time
-and every single request came back `200`, confirming the zero-downtime
-claim isn't just theoretical; blue was decommissioned; and the rollback
-pipeline was confirmed to actually restore blue and flip the Service
-selector back. Three real problems came up along the way, none of them
-about the blue-green concept itself — missing `mvnw`, Postgres only
-being reachable from inside the cluster, and a container registry that
-doesn't exist — and the fixes for all three are the same pattern
-established in module 14's Jenkinsfile.
 
 ## The scenario
 
@@ -56,6 +36,8 @@ from backup if it goes wrong partway through.
   comment for why) that scales blue back up and flips the selector back.
 
 ## Exercise Prerequisites
+
+*Note*: This exercise requires Docker, therefore we strongly advise running the exercise on your local machine, so you can be fully hands-on and implement these tools yourself. That said, all exercises are optional.
 
 Same Jenkins instance and cluster as module 14 — no new tooling needed,
 `docker`, `buildx`, `mvn`, a matching JDK, `kubectl`, and a working
@@ -173,8 +155,6 @@ column and backfilling it. The "contract" half (a v3 app that reads
 `product_sku` exclusively, followed by a final migration dropping `sku`)
 is a **second**, separate blue-green cycle that follows exactly the same
 pattern demonstrated here, run only after enough time has passed to be
-confident nothing is still depending on the old column. Building it out
-wasn't essential to demonstrating the pattern and would have doubled
-this exercise's size for limited additional teaching value — but it's
-worth knowing that a real expand-contract migration is rarely "done" in
-one deploy.
+confident nothing is still depending on the old column. It isn't built
+here, but it's worth knowing that a real expand-contract migration is
+rarely "done" in one deploy.
