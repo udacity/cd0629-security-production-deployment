@@ -46,8 +46,6 @@ services:
     build: ./orderservice
     environment:
       - INVENTORY_BASE_URL=http://inventoryservice:8082
-      - MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED=true
-      - MANAGEMENT_OTLP_METRICS_EXPORT_URL=http://otel-collector:4318/v1/metrics
       - MANAGEMENT_OTLP_TRACING_ENABLED=true
       - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://otel-collector:4318/v1/traces
     ports:
