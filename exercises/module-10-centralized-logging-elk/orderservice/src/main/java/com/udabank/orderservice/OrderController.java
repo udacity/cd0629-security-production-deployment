@@ -30,7 +30,7 @@ public class OrderController {
      * Deliberately broken — surcharge-service integration was never
      * finished. This is the "simulated incident" for the dashboard
      * exercise: hit this a bunch of times and watch the error rate spike
-     * in Kibana. See docs/EXERCISE.md, Exercise Step 6.
+     * in Kibana (Step 6 of the README).
      */
     @GetMapping("/orders/{orderId}/expedite")
     public Map<String, Object> expedite(@PathVariable String orderId) {
