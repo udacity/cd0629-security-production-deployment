@@ -1,41 +1,17 @@
 # Exercise: Apply CI/CD with Jenkins
 
 
-## A note on how this exercise was built
-
-This one *has* been run live, end to end, on a real Jenkins instance
-against a real minikube cluster — including watching the pipeline fail,
-fixing what broke, and watching it succeed. Three real problems came up
-along the way, none of them Jenkinsfile syntax errors: the base Jenkins
-image is missing `docker`, `mvn`, and a JDK new enough for this project;
-the mounted Docker socket needs its permissions opened up before the
-`jenkins` user can actually use it; and getting an image into a
-Kubernetes cluster or a working kubeconfig into Jenkins both run into
-the same root issue — tools like `minikube image load` assume they're
-running on the same machine as the cluster, which isn't true when
-Jenkins is its own separate container. 
-
-The other thing worth knowing: this exercise was deliberately
-simplified to need only **one** Jenkins Credential instead of three.
-The original design needed an NVD API key, a container registry login,
-and a kubeconfig upload — two of those were setup friction that had
-nothing to do with the actual lesson (branch gating, an approval gate,
-a failure notification), so they're gone. The one that's left, an NVD
-key, genuinely can't be removed — confirmed directly by trying to run
-the security scan without one: it doesn't just get slower, it fails
-outright, since the tool has no vulnerability data to check against at
-all on a fresh instance. See the Jenkinsfile's header comment for
-exactly what changed and why.
-
 ## The scenario
 
-`orderservice` has been containerized (module 12) and manually deployed
-to Kubernetes (module 13) by hand, every time. Priya's ask: automate the
+`orderservice` has been containerized and manually deployed
+to Kubernetes by hand, every time. Priya's ask: automate the
 whole thing — build, test, security-scan, publish, and deploy to staging,
 gated behind a human approval before anything touches staging, with a
 notification if any of it fails.
 
 ## Exercise Prerequisites
+
+*Note*: This exercise requires Docker, therefore we strongly advise running the exercise on your local machine, so you can be fully hands-on and implement these tools yourself. That said, all exercises are optional.
 
 1. A running Jenkins instance (Docker is the usual way:
    `docker run -p 8080:8080 -p 50000:50000 -v /var/run/docker.sock:/var/run/docker.sock jenkins/jenkins:lts`),
@@ -60,8 +36,8 @@ notification if any of it fails.
 4. One Jenkins Credential (Manage Jenkins → Credentials → System →
    Global credentials → Add Credentials): `nvd-api-key`, Secret text —
    free at nvd.nist.gov/developers/request-an-api-key, about a minute
-   to get. See the Jenkinsfile's header comment for exactly why this is
-   the one credential that couldn't be simplified away.
+   to get. The Security Scan stage needs it because Dependency-Check
+   downloads vulnerability data from the NVD, which requires a key.
 5. This repo pushed somewhere Jenkins can reach it (a local Git server,
    or any Git host) — a Multibranch Pipeline job needs a real repo with
    branches to discover, not just a local `Jenkinsfile` sitting in a
@@ -125,12 +101,9 @@ notification if any of it fails.
   real pipeline.
 - **`NvdApiException: Invalid API Key` or `NoDataException: No
   documents exist`.** Either the `nvd-api-key` credential is missing
-  or misspelled, or you're looking at an older attempt from before this
-  exercise settled on needing that one credential (an earlier version
-  tried running with none via `-DautoUpdate=false` — that fails
-  outright too, it doesn't degrade gracefully, so it's not a valid
-  workaround). Double-check the credential exists under exactly that
-  ID.
+  or misspelled. Running with no key (for example via
+  `-DautoUpdate=false`) fails outright too — it doesn't degrade
+  gracefully. Double-check the credential exists under exactly that ID.
 - **OWASP Dependency-Check running slowly even with a key.** NVD still
   rate-limits fairly aggressively on a cold cache (same caveat as
   module 6). The plugin keeps its downloaded data under
