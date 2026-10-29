@@ -39,18 +39,24 @@ notification if any of it fails.
 
 1. A running Jenkins instance (Docker is the usual way:
    `docker run -p 8080:8080 -p 50000:50000 -v /var/run/docker.sock:/var/run/docker.sock jenkins/jenkins:lts`),
-   with `docker`, `mvn`, and a JDK matching `orderservice/pom.xml`
-   actually installed wherever its pipeline steps run — the base image
-   ships with none of the three. See this repo's own dry run (in
-   `docs/DEMO_SCRIPT.md`'s risk checklist) for exactly what had to be
-   added by hand.
+   with `docker`, `mvn`, `kubectl`, and a JDK matching
+   `orderservice/pom.xml` actually installed wherever its pipeline steps
+   run — the base image ships with none of them. (`kubectl` is used by
+   the `Deploy to Staging` stage.)
 2. Plugins: Pipeline, Docker Pipeline, OWASP Dependency-Check, Workspace
-   Cleanup.
+   Cleanup, Timestamper (for `timestamps()`), and JUnit (for the `junit`
+   step).
 3. A local Kubernetes cluster (reusing the one from the Kubernetes
    module) as the "staging" deploy target, with a working kubeconfig
    dropped into the Jenkins environment at `/var/jenkins_home/.kube-config`
    — this is a **one-time setup step done by whoever stands up this
-   Jenkins instance**, not something each student configures.
+   Jenkins instance**, not something each student configures. The
+   `Docker Build and Load` stage is **minikube-specific**: it copies the
+   image into the cluster with `docker save | docker exec -i minikube
+   docker load`, so a Jenkins host with no container named `minikube`
+   will fail there. On kind, replace that line with
+   `kind load docker-image "$IMAGE_TAG"`; on any other cluster, push to a
+   registry the cluster can pull from instead.
 4. One Jenkins Credential (Manage Jenkins → Credentials → System →
    Global credentials → Add Credentials): `nvd-api-key`, Secret text —
    free at nvd.nist.gov/developers/request-an-api-key, about a minute
@@ -59,7 +65,12 @@ notification if any of it fails.
 5. This repo pushed somewhere Jenkins can reach it (a local Git server,
    or any Git host) — a Multibranch Pipeline job needs a real repo with
    branches to discover, not just a local `Jenkinsfile` sitting in a
-   directory.
+   directory. This module folder is meant to be the **root of its own git
+   repository**, so `Jenkinsfile` sits at the repo root and the paths
+   inside it (`orderservice/`, `k8s/`) resolve correctly. If you push it
+   as a subfolder of a larger repo instead, set the job's **Script Path**
+   to `<subfolder>/Jenkinsfile` and wrap each stage's steps in
+   `dir('<subfolder>')`.
 
 ## Exercise Steps
 
@@ -87,14 +98,16 @@ notification if any of it fails.
    rolling update from the Kubernetes module happening again, this time
    triggered by Jenkins instead of you typing the command.
 
-5. **Break something on purpose** (a failing test, or a real CVE
-   introduced by pinning a dependency to an old version) and watch the
-   pipeline fail at that stage. Confirm the `NOTIFY:` line in the
+5. **Break something on purpose** by pinning a dependency in
+   `orderservice/pom.xml` to an old version with a known CVE, and watch
+   the pipeline fail at `Security Scan`. Confirm the `NOTIFY:` line in the
    console output for the `post { failure { ... } }` block actually
    fires (a real setup would send this to Slack or email instead —
    simplified here to keep the exercise credential-free).
 
-6. **Re-run just the failed stage**, not the whole pipeline. 
+6. **Re-run just the failed stage**, not the whole pipeline. On the
+   failed build's page in Jenkins, use **Restart from Stage** and pick
+   the stage that failed.
 
 ## Common Pitfalls
 
@@ -120,8 +133,11 @@ notification if any of it fails.
   ID.
 - **OWASP Dependency-Check running slowly even with a key.** NVD still
   rate-limits fairly aggressively on a cold cache (same caveat as
-  module 6). Cache `orderservice/target/dependency-check-data/` between
-  builds if you're running this repeatedly.
+  module 6). The plugin keeps its downloaded data under
+  `~/.m2/repository/org/owasp/dependency-check-data/` by default, so
+  keep that directory between builds (for example, a persistent Jenkins
+  home volume). Don't cache anything under `orderservice/target/`:
+  `mvn clean` and `cleanWs()` both wipe it on every build.
 
 ## Task List
 
