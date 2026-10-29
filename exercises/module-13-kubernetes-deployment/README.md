@@ -138,7 +138,7 @@ ready to receive traffic vs. when to restart it.
 
 - [ ] Cluster running, images built and visible to it (Steps 1–2)
 - [ ] All manifests applied, no errors (Step 3)
-- [ ] Both `orderservice` pods reach `2/2 Running` / `Ready` (Step 4)
+- [ ] Both `orderservice` pods reach `Running` and `1/1` Ready (Step 4)
 - [ ] `/orders/{id}` works through a port-forward (Step 5)
 - [ ] Rolling update completed with zero dropped requests, observed pod
       lifecycle during the rollout (Step 6)
@@ -155,3 +155,5 @@ job in this scenario?
 
 *(A good reflection response is between 75 and 125 words.)*
 
+See [`docs/SOLUTION.md`](docs/SOLUTION.md) for one answer, and for the
+module's own "rolling an update and observing pod lifecycle" walkthrough.
