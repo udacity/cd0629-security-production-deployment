@@ -44,9 +44,9 @@ example. Two things are still open doors:
    the actual methods the frontend calls (`GET`, `POST`), and allow
    credentials (the CSRF cookie needs to travel with cross-origin requests).
 2. [`CspNonceHeaderWriter.java`](src/main/java/com/harborlight/authdemo/config/CspNonceHeaderWriter.java) —
-   fill in `buildPolicy(nonce)`. The class-level comment there has the
-   exact directives you need and why each one matters for Theo's incident
-   specifically.
+   fill in `buildPolicy(nonce)`. The Javadoc comment on that method has
+   the exact directives you need and why each one matters for Theo's
+   incident specifically.
 
 ## Running it
 
@@ -90,7 +90,9 @@ locally and open Chrome/Firefox DevTools' **Network** tab:
   section for `Content-Security-Policy`, `X-Frame-Options`, etc.
 - The **Console** tab will show a CSP violation warning (in red) if a page
   you're viewing tries to do something the policy blocks — that's the
-  live version of what `/csp-reports` receives programmatically.
+  live version of the violations the policy's `report-uri /csp-reports`
+  directive asks browsers to send to that path. (The starter has no
+  handler for `/csp-reports`; the solution adds one.)
 - You won't have a real `app.harborlight.example` SPA to test CORS against
   interactively without setting one up — the `curl` checks above are the
   practical way to verify that part.
