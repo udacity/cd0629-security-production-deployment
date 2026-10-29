@@ -38,7 +38,7 @@ CSRF=$(grep -o '_csrf" value="[^"]*"' login.html | sed 's/.*value="\(.*\)"/\1/')
 curl -b cookies.txt -c cookies.txt -i -X POST http://localhost:8080/login \
   --data-urlencode "_csrf=$CSRF" \
   --data-urlencode "username=bob" \
-  --data-urlencode "password=FrontRow2025" \
+  --data-urlencode 'password=FrontRow!2025' \
   --data-urlencode "remember-me=true"
 ```
 ```
@@ -82,7 +82,7 @@ mvn spring-boot:run
 ```
 
 - `alice` / `BoxOffice!2025` → redirects to `/admin`
-- `bob` / `FrontRow2025` → redirects to `/dashboard`
+- `bob` / `FrontRow!2025` → redirects to `/dashboard`
 - `bob` with "remember me" checked → `Set-Cookie: remember-me=...`
 - `carol` / wrong password × 5, then her correct password → still
   `/login?error` (locked); confirm in `admin/persistent-logins`-style
