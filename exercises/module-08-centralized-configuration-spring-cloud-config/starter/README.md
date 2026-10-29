@@ -13,8 +13,10 @@ and checking — a classic "who changed this and when" problem. Priya wants
 
 - `config-server/` — given, not part of the exercise. A working Spring
   Cloud Config Server backed by the local Git repo in `config-repo/`.
-- `config-repo/` — given. A real (local) Git repo with three files
-  demonstrating precedence: `application.yml` (generic default),
+- `config-repo/` — given. A folder with three files that you turn into a
+  local Git repo (see "Running it") — the Config Server reads its
+  configuration from Git, not from plain files. The files demonstrate
+  precedence: `application.yml` (generic default),
   `orderservice.yml` (this app's default), `orderservice-dev.yml`
   (this app's dev-profile override).
 - `orderservice/` — the exercise. Currently has `welcome.message`
@@ -27,11 +29,25 @@ The TODO comments there have the exact property and why it's needed.
 
 ## Running it
 
-Two terminals:
+First, turn `config-repo/` into a Git repository. The Config Server
+reads from Git, and the folder isn't one yet if you got it as a plain
+download. (If `config-repo/` already contains a `.git` folder, skip this.)
+The branch must be named `main`, because the Config Server is set to use
+it:
+
+```bash
+cd config-repo
+git init -b main
+git add .
+git commit -m "Initial config repo"
+cd ..
+```
+
+Then two terminals:
 
 ```bash
 # Terminal 1
-cd config-server && mvn spring-boot:run   # or: mvn spring-boot:run
+cd config-server && mvn spring-boot:run
 
 # Terminal 2 (after the config server logs "Started ConfigServerApplication")
 cd orderservice && mvn spring-boot:run
