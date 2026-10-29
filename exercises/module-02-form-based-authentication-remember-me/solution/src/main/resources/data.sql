@@ -3,7 +3,7 @@
 -- Spring Security's Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8() produces.
 --
 -- alice / BoxOffice!2025      -> role ADMIN (venue manager)
--- bob   / FrontRow2025       -> role USER  (regular customer, used in the redirect/remember-me tests)
+-- bob   / FrontRow!2025      -> role USER  (regular customer, used in the redirect/remember-me tests)
 -- carol / BackstagePass!2025  -> role USER  (regular customer, dedicated to the lockout test so it
 --                                             doesn't interfere with bob's other test scenarios)
 
