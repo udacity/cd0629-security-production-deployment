@@ -1,65 +1,64 @@
-# Exercise: Apply Form-Based Authentication with Remember-Me
+# Exercise: Apply Custom Authentication Configuration
 
 **Estimated time:** 10–20 minutes
 
 ## The scenario
 
-You're a backend engineer at **Encore Tickets**, a live-events ticketing
-startup. Last night was the on-sale for a sold-out arena show, and this
-morning your support lead, Devon, is waiting for you in Slack:
+It's Thursday afternoon at **Udabank**, a small fintech startup building
+invoicing software for freelancers. You joined the backend team two weeks ago.
 
-> "Two things from last night, both in the `authdemo` service:
->
-> 1. Support got flooded with 'I keep getting logged out mid-checkout'
->    tickets. People are re-entering their card details three times because
->    their session doesn't survive a tab switch. We need 'remember me' on
->    the login form — backed by a real token store, not just a long session
->    cookie, since infra wants to be able to revoke a stolen device's token
->    without killing everyone else's session.
->
-> 2. Our WAF logs show something like credential stuffing against `/login`
->    from a handful of IPs — dozens of attempts against the same handful of
->    usernames. We don't have a WAF rule for this yet, so in the meantime
->    I want the app itself to lock an account after 5 failed attempts.
->
-> Oh — and separate thing, not urgent but annoying: when a venue admin logs
-> in they land on the customer dashboard like everyone else and have to
-> click over to the admin console manually. Can you make it redirect them
-> straight to `/admin` while you're in there?
->
-> No rush on the WAF rule, but the lockout and the redirect are both quick,
-> right? Ship whenever."
+Your CTO, Priya, drops into your DMs:
 
-You pull up `authdemo`. The login page, the `User` entity (already has
-`failedAttempts` and `accountLocked` columns), and the `/admin` and
-`/dashboard` pages all exist. `SecurityConfig` already has the authorization
-rules, the Argon2 password encoder, and the remember-me token store wired up
-as a worked example — what's missing is the actual behavior Devon asked for.
+> "Hey — compliance review is tomorrow morning and I just realized `/app/**`
+> has zero authentication. Anyone who knows the URL can hit the dashboard.
+> I need a fix shipped today, not a perfect one. Here's what I need:
+>
+> 1. Keep `/public/**` open — that's the marketing/health-check stuff, fine as is.
+> 2. Lock down everything under `/app/**` so only logged-in users can reach it.
+> 3. We already have a `users` table with an `alice` (admin) and `bob` (regular
+>    user) row — wire authentication to read from there, not some hardcoded list.
+> 4. Security wants passwords hashed with **Argon2id** — it's what OWASP
+>    recommends now, and BCrypt alone won't pass the audit.
+> 5. Frontend hasn't built the real login page yet, so don't wire up form
+>    login. Marcus on QA needs to be able to test this from curl/Postman
+>    this afternoon — just get HTTP Basic working as a stopgap.
+>
+> Ship it, then ping me — I want to show this to the auditor tomorrow."
+
+You pull up the `authdemo` service. The `User` JPA entity, `UserRepository`,
+and REST controllers for `/public/**` and `/app/**` already exist. What's
+missing is the security wiring itself: a `DbUserDetailsService` that actually
+reads from the database, and a `SecurityFilterChain` that enforces Priya's
+rules using the Spring Security 7 lambda-only DSL.
 
 ## Your tasks
 
-Two files, two `TODO`s:
+Open these two files — both have `TODO` markers. The `/public/**` rule,
+HTTP Basic, and the disabled form login are already wired up in
+`SecurityConfig` as a worked example — you're extending that pattern, not
+starting from a blank file.
 
-- [`RoleBasedAuthenticationSuccessHandler.java`](src/main/java/com/encoretickets/authdemo/security/RoleBasedAuthenticationSuccessHandler.java) —
-  redirect `ROLE_ADMIN` users to `/admin`, everyone else to `/dashboard`.
-- [`AccountLockoutAuthenticationFailureHandler.java`](src/main/java/com/encoretickets/authdemo/security/AccountLockoutAuthenticationFailureHandler.java) —
-  on a failed login, look the user up, increment their failed-attempt
-  counter, and lock the account once it hits 5.
+- [`DbUserDetailsService.java`](src/main/java/com/udabank/authdemo/user/DbUserDetailsService.java) —
+  implement `loadUserByUsername` to look the user up via `UserRepository` and
+  map it to a Spring Security `UserDetails` (role → `ROLE_` authority,
+  `enabled` → `disabled`).
+- [`SecurityConfig.java`](src/main/java/com/udabank/authdemo/config/SecurityConfig.java) —
+  two things:
+  1. A `PasswordEncoder` bean using `Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()`.
+  2. Two more `authorizeHttpRequests` rules below the given `/public/**` example:
+     `/app/**` → `authenticated()`, and `anyRequest()` → `denyAll()` (fail closed).
 
-Then wire both into `formLogin()` in
-[`SecurityConfig.java`](src/main/java/com/encoretickets/authdemo/config/SecurityConfig.java)
-(one small `TODO` there — `.successHandler(...)` / `.failureHandler(...)`).
-Remember-me itself is already fully configured; you don't need to touch it.
+That covers requirements (a)–(d) from Priya's message. `PathPatternRequestMatcher`
+and the lambda-only DSL are already used in the example rule — just mirror it.
 
 ## Seed data
 
-`data.sql` seeds three users with real Argon2id password hashes:
+`data.sql` already seeds two users with real Argon2id password hashes:
 
-| username | password              | role  | notes |
-|----------|-----------------------|-------|-------|
-| alice    | `BoxOffice!2025`       | ADMIN | venue manager |
-| bob      | `FrontRow!2025`        | USER  | use for the redirect / remember-me checks |
-| carol    | `BackstagePass!2025`   | USER  | dedicated to the lockout check, so you can hammer her account without breaking bob's tests |
+| username | password         | role  |
+|----------|------------------|-------|
+| alice    | `VaultAdmin!2025` | ADMIN |
+| bob      | `QaTester!2025`   | USER  |
 
 ## Running it
 
@@ -67,32 +66,34 @@ Remember-me itself is already fully configured; you don't need to touch it.
 mvn spring-boot:run
 ```
 
-Then open `http://localhost:8080/login` in a browser — the form, CSRF token,
-and remember-me checkbox are already there.
-
 ## Verifying your work
 
-Right now your handlers aren't wired into `formLogin()` yet, so Spring
-Security's defaults apply: after a successful login you're redirected to
-`/`, which has no page, so you'll see a 404 error even though the login
-worked. Failed logins just bounce back to `/login?error` with no lockout.
-That's the "not done yet" state. Once you wire in the handlers, the
-starter `RoleBasedAuthenticationSuccessHandler` sends *everyone* to
-`/dashboard` (even alice) until you implement the role-based redirect.
-Once both TODOs are done:
+Before you touch any code, run `./mvn spring-boot:run` and try the two
+endpoints: `/public/health` already returns **200** (that's the given
+example rule), but `/app/dashboard` returns **401** no matter what
+credentials you pass — the `PasswordEncoder` bean doesn't exist yet, so
+`DbUserDetailsService` can't authenticate anyone. Once you finish both
+TODOs, all four checks below should pass:
 
-- Log in as `alice` / `BoxOffice!2025` → should land on `/admin`.
-- Log in as `bob` / `FrontRow!2025` → should land on `/dashboard`.
-- Check "remember me" while logging in as `bob` → response should set a
-  `remember-me` cookie.
-- Submit `carol` with the wrong password 5 times in a row, then submit her
-  **correct** password on the 6th try → should still bounce to
-  `/login?error`, because the account is now locked.
+```bash
+# (a) Public endpoint — should be 200 with no credentials
+curl -i http://localhost:8080/public/health
 
-Or just run the (currently empty) test skeletons and fill them in as you go:
+# (b) App endpoint, anonymous — should be 401
+curl -i http://localhost:8080/app/dashboard
+
+# (c) + (d) App endpoint with valid DB-backed credentials over HTTP Basic — should be 200
+curl -i -u alice:VaultAdmin!2025 http://localhost:8080/app/dashboard
+
+# Wrong password — should be 401
+curl -i -u alice:wrong-password http://localhost:8080/app/dashboard
+```
+
+Or run the (currently empty) test skeletons and fill them in as you go:
 
 ```bash
 mvn test -Dtest=SecurityConfigTest
 ```
 
-You're done when all 5 tests in `SecurityConfigTest` pass.
+You're done when all four `curl` checks above behave as described and the
+tests in `SecurityConfigTest` pass.
