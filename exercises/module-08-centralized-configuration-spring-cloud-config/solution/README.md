@@ -17,6 +17,32 @@ spring:
 which app-specific files to layer in — nothing else in this file needs to
 reference `orderservice.yml` by name.
 
+## Running the solution
+
+The Config Server reads from Git, so `config-repo/` has to be a Git
+repository. If you got a copy without a `.git` folder inside it, create
+one first (the branch must be named `main`, because the Config Server is
+set to use it):
+
+```bash
+cd config-repo
+git init -b main
+git add .
+git commit -m "Initial config repo"
+cd ..
+```
+
+Then start the Config Server, and after it logs "Started
+ConfigServerApplication", start the client in a second terminal:
+
+```bash
+# Terminal 1
+cd config-server && mvn spring-boot:run
+
+# Terminal 2
+cd orderservice && mvn spring-boot:run
+```
+
 ## Solution walkthrough: reviewing precedence rules
 
 Verified end-to-end (config server + client both actually running, not
