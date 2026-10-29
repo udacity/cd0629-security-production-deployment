@@ -12,27 +12,11 @@ real dependencies: **Postgres** (placed orders persist to a
 30s via Spring's `@Cacheable`, so `inventoryservice` isn't re-queried on
 every repeat request for the same SKU).
 
-## What's here — and what's actually been built and measured
+## Before you start
 
-Unlike the ELK/Prometheus modules, most of this one *is* live-verified —
-Docker builds and container runs, not just config review. Every number
-in Steps 1–3 and 5 below was actually measured, not estimated. Step 4
-(the full `docker-compose.yml` stack) is the one exception: the
-equivalent setup — `orderservice` + `inventoryservice` + Postgres + Redis,
-manually run and networked together with plain `docker run` — was
-confirmed working (order persisted to Postgres, inventory lookup cached
-in Redis), but `docker compose up` itself hit a Docker Desktop networking
-issue partway through this exercise's build (a restart left the daemon
-briefly unresponsive) and wasn't re-verified afterward. The compose file
-is syntactically validated (`docker compose config` parses it and
-resolves all the same values a manual `docker run` used successfully),
-just not click-run-confirmed as literally `docker compose up`.
-
-- `orderservice/Dockerfile` — a real 3-stage build: compile → extract
-  Spring Boot's layered jar → assemble the runtime image from those
-  layers (see the comments in the file for why layering matters).
-- `docker-compose.yml` — `orderservice` + `inventoryservice` + Postgres +
-  Redis, wired together over a Docker network.
+You need Docker (Docker Desktop is fine), JDK 25, and Maven installed.
+Make sure Docker is running before Step 1: `docker ps` should print a
+(possibly empty) table, not an error.
 
 ## Exercise Steps
 
@@ -42,94 +26,91 @@ just not click-run-confirmed as literally `docker compose up`.
    docker build -t udabank/orderservice:layered .
    docker images udabank/orderservice:layered
    ```
-   Measured on this machine: **621MB**. (Most of that is the JRE base
-   image and the dependency layer — Spring Boot + Hibernate + the
-   Postgres/Redis clients pull in a fair amount.)
+   Expect a size of roughly 600MB. Most of that is the JRE base image and
+   the dependency layer — Spring Boot, Hibernate, and the Postgres and
+   Redis clients pull in a fair amount.
 
-2. **Run it and check startup time** (needs Postgres/Redis reachable —
-   easiest via `docker compose up` from the module root, see Step 4):
+2. **Bring up the full stack and check startup time.** From the module
+   root (the folder that contains `docker-compose.yml`), start
+   `orderservice`, `inventoryservice`, Postgres, and Redis together:
    ```bash
-   docker logs <container> | grep "Started OrderServiceApplication"
+   cd ..   # back to the module root, if you are still in orderservice/
+   docker compose up -d --build
+   docker compose logs orderservice | grep "Started OrderServiceApplication"
    ```
-   Measured (running inside a real container, connected to real Postgres
-   + Redis containers): **3.899 seconds**.
-
-3. **Compare startup with and without a JDK 25 AOT cache.** This part
-   was measured running the jar directly (not containerized) to isolate
-   the JVM-level effect from container-startup overhead:
+   Expect a startup time of around 4 seconds. Then place an order and
+   confirm it was saved and cached:
    ```bash
+   curl http://localhost:8081/orders/ORD-1
+   docker compose exec postgres psql -U orderservice -d orderservice -c "SELECT * FROM placed_orders;"
+   docker compose exec redis redis-cli KEYS '*'
+   ```
+   You should see your order in the `placed_orders` table and a key like
+   `inventory::SKU-123` in Redis (the cached inventory lookup).
+
+3. **Compare startup with and without a JDK 25 AOT cache.** This step
+   runs the jar directly on your machine, not in a container, so you
+   measure the JVM itself without container startup overhead. Postgres,
+   Redis, and `inventoryservice` from Step 2 stay running, but the
+   `orderservice` container must be stopped first because both want port
+   8081:
+   ```bash
+   docker compose stop orderservice
+   cd orderservice
+   mvn -DskipTests package
+
    # one-time: record a training run and produce the cache
    java -XX:AOTMode=record -XX:AOTCacheOutput=app.aot -jar target/orderservice-*.jar
-   # (hit a few endpoints, then stop it — Ctrl+C or SIGTERM — so it writes app.aot)
+   # in another terminal, run: curl http://localhost:8081/orders/ORD-1
+   # then stop the app (Ctrl+C) so it writes app.aot
 
    # baseline
    java -jar target/orderservice-*.jar
    # with the cache
    java -XX:AOTCache=app.aot -jar target/orderservice-*.jar
    ```
-   Measured: **4.539s without the cache, 3.142s with it** — about a 31%
-   reduction, with no errors or behavior differences in either run.
+   For each run, note the "Started OrderServiceApplication in X seconds"
+   line. Expect the cached run to start roughly 30% faster.
 
-4. **Bring up the full stack** (app + Postgres + Redis + inventoryservice):
-   ```bash
-   cd .. # module root
-   docker compose up -d --build
-   curl http://localhost:8081/orders/ORD-1
-   ```
-   The equivalent manual setup (each container run individually, wired
-   together on a shared Docker network) was confirmed working end-to-end:
-   the order got persisted to Postgres and the inventory lookup got
-   cached in Redis under `inventory::SKU-123`. `docker compose up` itself
-   wasn't re-run after a Docker Desktop restart interrupted testing — if
-   you hit anything unexpected here, that's the one part of this exercise
-   genuinely worth double-checking yourself rather than trusting these
-   notes fully.
-   ```bash
-   docker compose exec postgres psql -U orderservice -d orderservice -c "SELECT * FROM placed_orders;"
-   docker compose exec redis redis-cli KEYS '*'
-   ```
-
-5. **Try Jib — and see what actually happens.** `orderservice/pom.xml`
-   already has the `jib-maven-plugin` configured:
+4. **Try Jib and compare.** `orderservice/pom.xml` already has the
+   `jib-maven-plugin` configured. From the `orderservice` folder, run:
    ```bash
    mvn compile jib:dockerBuild
    ```
-   
+   With JDK 25, expect this to fail. Read the error message Maven prints,
+   and compare it with Step 1, where the Dockerfile build worked. That
+   comparison is the point of this step.
+
 ## Common Pitfalls
 
-- **`java -Djarmode=layertools`** is the old syntax (Spring Boot ≤3.1) —
-  Spring Boot 4 (and 3.2+) uses **`-Djarmode=tools`** with an `extract`
-  subcommand instead. The old flag doesn't error loudly, it just doesn't
-  do what you expect — always check `java -Djarmode=tools -jar app.jar
-  list-layers` actually lists your 4 layers before trusting the Dockerfile
-  copies them correctly.
-- **`-XX:AOTMode=record` alone isn't enough** — it needs
+- **`java -Djarmode=layertools`** is the old syntax (Spring Boot before
+  3.3). Spring Boot 4 (and 3.3+) uses **`-Djarmode=tools`** with an
+  `extract` subcommand instead. The old flag doesn't error loudly, it
+  just doesn't do what you expect. Check that
+  `java -Djarmode=tools -jar app.jar list-layers` lists your 4 layers
+  before trusting that the Dockerfile copies them correctly.
+- **`-XX:AOTMode=record` alone isn't enough.** It needs
   `-XX:AOTCacheOutput=<file>` (or `-XX:AOTConfiguration=<file>` for the
-  two-step workflow) or the JVM refuses to start at all with a clear
-  error. `-XX:AOTCache=<file>` is for *using* an existing cache, not
-  producing one.
-- **A host port that looks free via `lsof` can still fail to bind** if
-  Docker Desktop's own networking is in a bad state — this happened while
-  building this exercise (`docker run -p 5433:5432 ...` failed with
-  "address already in use" while `lsof -i :5433` showed nothing
-  listening at all). Restarting Docker Desktop didn't resolve it cleanly
-  either — the daemon was still unresponsive to basic commands like
-  `docker ps` for a while afterward. If `docker compose up` fails this
-  way and `lsof` shows the port genuinely free, it's Docker Desktop
-  itself, not your compose file — but be prepared for a restart to take
-  longer than expected, and don't assume it fixed things until `docker
-  ps` responds normally again.
+  two-step workflow), or the JVM refuses to start. `-XX:AOTCache=<file>`
+  is for *using* an existing cache, not producing one.
+- **`port is already allocated` / `address already in use` on 5432.**
+  You probably have a Postgres already running on your machine. Either
+  stop it, or change the Postgres `ports` line in `docker-compose.yml` to
+  `"5433:5432"` and run the host-side `java` commands in Step 3 with
+  `DB_PORT=5433`. Containers are unaffected, since they talk to Postgres
+  over the compose network on 5432.
+- **A port looks free but Docker still can't bind it, or `docker ps`
+  hangs.** Docker Desktop's networking may be in a bad state. Restart
+  Docker Desktop and wait until `docker ps` responds normally before you
+  retry `docker compose up`.
 
 ## Task List
 
 - [ ] Layered image built, size checked (Step 1)
-- [ ] Container started, startup time confirmed in logs (Step 2)
-- [ ] AOT cache comparison run, both numbers recorded (Step 3)
-- [ ] Full stack up via compose, order persisted to Postgres, inventory
-      lookup cached in Redis (Step 4 — verified via the manual
-      `docker run` equivalent, not yet re-confirmed as literal `docker
-      compose up` — see the note in Step 4)
-- [ ] Jib attempted, result (success or the specific failure) understood (Step 5)
+- [ ] Full stack up via compose, startup time checked, order persisted to
+      Postgres, inventory lookup cached in Redis (Step 2)
+- [ ] AOT cache comparison run, both startup times recorded (Step 3)
+- [ ] Jib attempted, and the result understood (Step 4)
 
 ## Free Response
 
