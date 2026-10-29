@@ -3,19 +3,6 @@
 **Estimated time:** 30–40 minutes (longer than other modules — this one
 involves standing up real infrastructure, not just editing code)
 
-## A note on how this exercise is different
-
-Every other module in this series is a starter/solution Spring Boot
-project you build, run, and verify with `curl` in a couple of minutes.
-This one isn't — it needs Elasticsearch, Kibana, and Filebeat running via
-Docker Compose, and part of the deliverable (a Kibana dashboard and an
-alert rule) is built by clicking through a UI, not by writing code. That
-makes it closer to a **local build** exercise: everything you need is
-here and verified to be correct where it can be (the Spring Boot config
-compiles and runs; `docker-compose.yml` and `filebeat.yml` are syntax
-and reference-checked), but actually standing up the stack and building
-the dashboard is on you, locally, with Docker.
-
 ## The scenario
 
 Udabank's `orderservice` and `inventoryservice` (same two services from
@@ -25,6 +12,8 @@ wants logs from both services centralized in Elasticsearch with a Kibana
 dashboard the on-call engineer can actually look at.
 
 ## Exercise Prerequisites
+
+*Note*: This exercise requires Docker, therefore we strongly advise running the exercise on your local machine, so you can be fully hands-on and implement these tools yourself. That said, all exercises are optional.
 
 1. Docker Desktop (or another Docker Engine + Compose v2) installed and
    running.
@@ -36,8 +25,8 @@ dashboard the on-call engineer can actually look at.
    - `docker-compose.yml` — the full stack: Elasticsearch, Kibana,
      Filebeat, and both Spring Boot services (built from their local
      `Dockerfile`s).
-   - `filebeat.yml` — ships each container's stdout to Elasticsearch,
-     parsing it as JSON (both services already log ECS-format JSON, from
+   - `filebeat.yml` — ships each container's logs to Elasticsearch,
+     parsing them as JSON (both services already log ECS-format JSON, from
      the correlation-ID module).
    - `orderservice/`, `inventoryservice/` — same two services as the
      correlation-ID module, plus one new endpoint (`/orders/{id}/expedite`)
@@ -110,8 +99,8 @@ dashboard the on-call engineer can actually look at.
    for i in $(seq 1 30); do curl -s http://localhost:8081/orders/ORD-1/expedite > /dev/null; done
    ```
    Refresh the dashboard (or set it to auto-refresh). You should see the
-   error-rate panel spike and `"surcharge-service unreachable"` show up
-   as the top error message.
+   error-rate panel spike, and error messages ending in
+   `surcharge-service unreachable` show up as the top error message.
 
 7. **Create an alert.** Kibana → Stack Management → Rules → Create rule
    → "Elasticsearch query" rule type → query
@@ -124,22 +113,23 @@ dashboard the on-call engineer can actually look at.
 ## Common Pitfalls
 
 - **Filebeat refuses to start.** Filebeat checks that `filebeat.yml` is
-  only writable by its owner — `chmod 600 filebeat.yml` before running
-  `docker compose up` (already set correctly on the copy in this repo,
-  but if you edit and re-save it from some editors, permissions can
-  reset). Check `docker compose logs filebeat` for
-  `"config file can only be writable by the owner"` if logs aren't
-  arriving.
+  only writable by its owner. Run `chmod 600 filebeat.yml` before
+  `docker compose up` — downloads, zips, and some editors don't preserve
+  file permissions, so don't assume it's already set. Look for
+  `"config file can only be writable by the owner"` in Filebeat's logs
+  (see the pitfall below about where they go) if logs aren't arriving.
 - **No `udabank-logs-*` documents at all.** Check `docker compose logs
   filebeat` for connection errors to Elasticsearch, and confirm the
-  `orderservice`/`inventoryservice` containers actually have the
-  `co.elastic.logs/enabled=true` label picked up (`docker inspect
-  <container> | grep co.elastic.logs`).
+  `orderservice`/`inventoryservice` containers are running (`docker
+  compose ps`). Filebeat picks containers by name: `filebeat.yml`
+  matches any container whose name contains `service`, so a renamed
+  container that no longer contains it won't be harvested.
 - **Logs arrive but `message` is the whole JSON blob, not parsed
-  fields.** This means the `co.elastic.logs/json.keys_under_root: "true"`
-  hint isn't being applied — double check the labels are on the
-  container Filebeat is actually watching (`docker compose ps` to
-  confirm container names match what you expect).
+  fields.** This means the `json.*` settings in `filebeat.yml` aren't
+  being applied to the container's input. Check that the
+  `json.keys_under_root: true` line is still present and indented under
+  the `type: container` input, and that the container name matches the
+  condition above.
 - **`docker compose ps` shows filebeat running, `docker compose logs
   filebeat` prints nothing at all, and the count stays at 0.** Filebeat
   8.15's own logs go to `/usr/share/filebeat/logs/*.ndjson` inside the
