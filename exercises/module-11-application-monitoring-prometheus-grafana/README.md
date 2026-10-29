@@ -2,21 +2,6 @@
 
 **Estimated time:** 30–40 minutes
 
-## A note on how this exercise is different
-
-Same shape as the ELK module: this needs real infrastructure (Prometheus,
-Grafana, Alertmanager, an OpenTelemetry Collector) via Docker Compose, and
-part of the deliverable — reading a Grafana dashboard, watching an alert
-fire — is observation, not code. What's verified here: `orderservice`'s
-custom metrics (`orders_placed_total`, `order_processing_seconds`) are
-real, compiled, and confirmed against a running instance's actual
-`/actuator/prometheus` output — not guessed at. The Grafana dashboard
-(`grafana/dashboards/udabank-orders.json`) uses those exact, verified
-metric names and labels, and is wired up for automatic provisioning, so
-it should load correctly the first time you bring the stack up — but I
-haven't run Grafana itself to confirm the panels render, since that needs
-the full stack live.
-
 ## The scenario
 
 `orderservice` and `inventoryservice` (same two services from the
@@ -27,15 +12,17 @@ that pages before a slow degradation becomes an outage.
 
 ## Exercise Prerequisites
 
+*Note*: This exercise requires Docker, therefore we strongly advise running the exercise on your local machine, so you can be fully hands-on and implement these tools yourself. That said, all exercises are optional.
+
 1. Docker Desktop (or Docker Engine + Compose v2) installed and running.
 2. Everything else is in this directory already:
    - `docker-compose.yml` — Prometheus, Grafana, Alertmanager, an OTel
      Collector, and both Spring Boot services.
-   - `orderservice/` — now exposes `/actuator/prometheus`, exports OTLP
-     metrics/traces to the collector, and has two custom metrics wired
-     into `OrderController`: a `orders_placed_total` counter and an
-     Observation-instrumented `order_processing_seconds` timer (see
-     `OrderMetrics.java`).
+   - `orderservice/` — now exposes `/actuator/prometheus` (which
+     Prometheus scrapes directly), sends traces to the collector over
+     OTLP, and has two custom metrics wired into `OrderController`: a
+     `orders_placed_total` counter and an Observation-instrumented
+     `order_processing_seconds` timer (see `OrderMetrics.java`).
    - `prometheus/alert_rules.yml` — a latency SLO-burn alert, already
      written against the real metric name.
    - `grafana/dashboards/udabank-orders.json` — a 4-panel dashboard,
@@ -53,12 +40,14 @@ that pages before a slow degradation becomes an outage.
    for i in $(seq 1 20); do curl -s http://localhost:8081/orders/ORD-$i > /dev/null; sleep 1; done
    ```
 
-3. **Confirm metrics are flowing** two ways — direct scrape and via the
-   OTLP collector:
+3. **Confirm metrics are flowing** two ways — directly from the
+   service, and through Prometheus, which scrapes it every 5 seconds:
    ```bash
    curl -s http://localhost:8081/actuator/prometheus | grep orders_placed_total
-   curl -s http://localhost:9090/api/v1/query?query=orders_placed_total | python3 -m json.tool
+   curl -s 'http://localhost:9090/api/v1/query?query=orders_placed_total' | python3 -m json.tool
    ```
+   (The quotes around the second URL matter: without them, zsh treats
+   `?` as a wildcard and the command fails with "no matches found".)
 
 4. **Open the dashboard.** `http://localhost:3000` (anonymous access is
    enabled for this exercise — no login needed) → Dashboards → Udabank
@@ -103,8 +92,8 @@ that pages before a slow degradation becomes an outage.
 ## Task List
 
 - [ ] Stack is up: `docker compose ps` shows all 6 services running
-- [ ] Metrics confirmed flowing both via direct scrape and via the OTLP
-      collector (Step 3)
+- [ ] Metrics confirmed flowing both directly from the service and through
+      Prometheus (Step 3)
 - [ ] Dashboard loads with real data in all 4 panels (Step 4)
 - [ ] Alert rule visible in Prometheus (Step 5)
 - [ ] Simulated incident (Step 6) moves the alert from Inactive → Pending → Firing
