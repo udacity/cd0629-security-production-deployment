@@ -72,9 +72,14 @@ and remember-me checkbox are already there.
 
 ## Verifying your work
 
-Right now, logging in as anyone redirects to `/dashboard` (even alice), and
-failed logins just bounce back to `/login?error` with no lockout — that's
-the "not done yet" state. Once both TODOs are done:
+Right now your handlers aren't wired into `formLogin()` yet, so Spring
+Security's defaults apply: after a successful login you're redirected to
+`/`, which has no page, so you'll see a 404 error even though the login
+worked. Failed logins just bounce back to `/login?error` with no lockout.
+That's the "not done yet" state. Once you wire in the handlers, the
+starter `RoleBasedAuthenticationSuccessHandler` sends *everyone* to
+`/dashboard` (even alice) until you implement the role-based redirect.
+Once both TODOs are done:
 
 - Log in as `alice` / `BoxOffice!2025` → should land on `/admin`.
 - Log in as `bob` / `FrontRow!2025` → should land on `/dashboard`.
