@@ -45,7 +45,7 @@ class SecurityConfigTest {
     void regularUserIsRedirectedToDashboardOnSuccessfulLogin() throws Exception {
         mockMvc.perform(post("/login").with(csrf())
                         .param("username", "bob")
-                        .param("password", "FrontRow2025"))
+                        .param("password", "FrontRow!2025"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dashboard"));
     }
@@ -54,7 +54,7 @@ class SecurityConfigTest {
     void rememberMeCookieIsSetWhenRequested() throws Exception {
         mockMvc.perform(post("/login").with(csrf())
                         .param("username", "bob")
-                        .param("password", "FrontRow2025")
+                        .param("password", "FrontRow!2025")
                         .param("remember-me", "true"))
                 .andExpect(cookie().exists("remember-me"));
     }
