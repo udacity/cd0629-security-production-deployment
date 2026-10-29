@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 /**
- * Given — not part of the exercise. The RestClient here already has
- * TraceparentPropagatingInterceptor registered; once you implement that
- * interceptor's TODO, every call made through this client automatically
- * propagates the current trace.
+ * Client for inventoryservice. The RestClient here has
+ * TraceparentPropagatingInterceptor registered, so every call made
+ * through this client automatically propagates the current trace.
  */
 @Component
 public class InventoryClient {
